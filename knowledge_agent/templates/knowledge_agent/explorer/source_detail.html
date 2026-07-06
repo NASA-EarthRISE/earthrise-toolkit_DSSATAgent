@@ -1,0 +1,256 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge — {{ source_title|default:source_slug }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/knowledge.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/inspect.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="documents" active_agent="knowledge_agent" %}
+
+<div class="explorer-container">
+
+    <!-- Header -->
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'knowledge_agent:explorer_documents' %}" class="breadcrumb">Documents</a>
+            <h1>{{ source_title|default:source_slug }}</h1>
+            <p class="subtitle"><span class="mono">{{ source_slug }}</span> · {{ total }} chunk{{ total|pluralize }}</p>
+        </div>
+        {% if has_source_file %}
+        <div class="header-actions">
+            <a href="{% url 'knowledge_agent:explorer_source_file' source_slug=source_slug %}"
+               target="_blank" class="btn btn-sm">Open PDF in new tab</a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Collapsible source document viewer -->
+    {% if has_source_file %}
+    <details class="source-doc-collapsible">
+        <summary class="source-doc-summary">
+            <span class="source-doc-summary-label">View source document</span>
+            <span class="source-doc-summary-chevron" aria-hidden="true">&#9656;</span>
+        </summary>
+        <div class="pdf-viewer-container">
+            <iframe src="{% url 'knowledge_agent:explorer_source_file' source_slug=source_slug %}"
+                    class="pdf-viewer-iframe"></iframe>
+        </div>
+    </details>
+    {% endif %}
+
+    <!-- Source stats -->
+    <div class="chunk-stats-row">
+        <div class="chunk-stat-card">
+            <span class="chunk-stat-value">{{ detail.base_chunks }}</span>
+            <span class="chunk-stat-label">Base chunks</span>
+        </div>
+        <div class="chunk-stat-card">
+            <span class="chunk-stat-value">{{ detail.contextual }}</span>
+            <span class="chunk-stat-label">Contextual</span>
+        </div>
+        <div class="chunk-stat-card">
+            <span class="chunk-stat-value">{{ detail.parents }}</span>
+            <span class="chunk-stat-label">Parents</span>
+        </div>
+        <div class="chunk-stat-card">
+            <span class="chunk-stat-value">{{ detail.children }}</span>
+            <span class="chunk-stat-label">Children</span>
+        </div>
+    </div>
+
+    <!-- Tab nav -->
+    <nav class="strategy-tabs" role="tablist">
+        <button class="tab-btn active" data-tab="base" role="tab">Base chunks</button>
+        <button class="tab-btn" data-tab="contextual" role="tab">Contextual</button>
+        <button class="tab-btn" data-tab="parent-child" role="tab">Parent / Child</button>
+        <button class="tab-btn" data-tab="graphrag" role="tab">GraphRAG</button>
+        <button class="tab-btn" data-tab="raptor" role="tab">RAPTOR</button>
+        <button class="tab-btn" data-tab="ontology" role="tab">Ontology</button>
+        <button class="tab-btn" data-tab="query" role="tab">Query</button>
+    </nav>
+
+    <!-- ============================================================
+         Tab: Base chunks (rendered server-side via existing context)
+         ============================================================ -->
+    <div class="tab-panel active" data-tab="base">
+        {% if chunks %}
+        <div class="chunks-list">
+            {% for chunk in chunks %}
+            <div class="chunk-card" id="chunk-{{ chunk.id|truncatechars:8 }}">
+                <div class="chunk-card-header">
+                    <div class="chunk-header-left">
+                        <span class="mono chunk-id">{{ chunk.id|truncatechars:12 }}</span>
+                        {% if chunk.metadata.page_number %}
+                        <span class="chunk-page">p.{{ chunk.metadata.page_number }}</span>
+                        {% endif %}
+                        {% if chunk.metadata.section_title %}
+                        <span class="chunk-section">{{ chunk.metadata.section_title|truncatewords:6 }}</span>
+                        {% endif %}
+                    </div>
+                    <span class="chunk-expand-icon">&#9660;</span>
+                </div>
+                <div class="chunk-preview">{{ chunk.content|truncatewords:30 }}</div>
+                <div class="chunk-full-content">
+                    <pre class="file-content-viewer">{{ chunk.content }}</pre>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a class="btn btn-sm" href="?page={{ page|add:'-1' }}&per_page={{ per_page }}">Prev</a>
+            {% endif %}
+            {% for p in page_range %}
+            <a class="btn btn-sm {% if p == page %}btn-primary{% endif %}"
+               href="?page={{ p }}&per_page={{ per_page }}">{{ p }}</a>
+            {% endfor %}
+            {% if page < total_pages %}
+            <a class="btn btn-sm" href="?page={{ page|add:'1' }}&per_page={{ per_page }}">Next</a>
+            {% endif %}
+            <span class="page-info">Page {{ page }} of {{ total_pages }}</span>
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">&#128196;</div>
+            <h3>No chunks found</h3>
+            <p>This source has not been chunked yet.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ============================================================
+         Tab: Contextual (lazy-loaded via API)
+         ============================================================ -->
+    <div class="tab-panel" data-tab="contextual" data-loaded="false">
+        <div class="tab-loading">Loading contextual chunks…</div>
+        <div class="contextual-list"></div>
+        <div class="contextual-pagination"></div>
+    </div>
+
+    <!-- ============================================================
+         Tab: Parent / Child (lazy-loaded)
+         ============================================================ -->
+    <div class="tab-panel" data-tab="parent-child" data-loaded="false">
+        <div class="tab-loading">Loading parent / child tree…</div>
+        <div class="pc-tree"></div>
+    </div>
+
+    <!-- ============================================================
+         Tab: GraphRAG (lazy-loaded)
+         ============================================================ -->
+    <div class="tab-panel" data-tab="graphrag" data-loaded="false">
+        <div class="tab-loading">Loading subgraph…</div>
+        <div class="graph-toolbar hidden">
+            <span class="label-sm">Filter by entity type:</span>
+            <div class="filter-chips"></div>
+            <span class="graph-stats"></span>
+        </div>
+        <div class="graph-canvas" id="graphrag-canvas"></div>
+        <div class="graph-detail">
+            <h4>Selected entity</h4>
+            <div class="graph-detail-body"><em>Click a node to inspect.</em></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         Tab: RAPTOR (lazy-loaded)
+         ============================================================ -->
+    <div class="tab-panel" data-tab="raptor" data-loaded="false">
+        <div class="tab-loading">Loading RAPTOR subtree…</div>
+        <div class="raptor-controls hidden">
+            <label class="label-sm">Max depth</label>
+            <input type="number" id="raptor-max-depth" value="3" min="1" max="10" class="depth-input">
+            <button class="btn btn-xs" id="raptor-reload">Reload</button>
+            <span class="raptor-stats"></span>
+        </div>
+        <div class="raptor-tree" id="raptor-tree-canvas"></div>
+
+        <div class="raptor-detail">
+            <h4>Selected node</h4>
+            <div class="raptor-detail-body"><em>Click a node to inspect.</em></div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         Tab: Ontology (lazy-loaded)
+         ============================================================ -->
+    <div class="tab-panel" data-tab="ontology" data-loaded="false">
+        <div class="tab-loading">Loading ontology…</div>
+        <div class="ontology-grid hidden">
+            <section class="ontology-schema-pane">
+                <h4>Schema <span class="hint">(tenant-wide TBox)</span></h4>
+                <div class="ontology-schema-body"></div>
+            </section>
+            <section class="ontology-source-pane">
+                <h4>This source's contribution</h4>
+                <div class="ontology-source-body"></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         Tab: Query (run any strategy scoped to this document)
+         ============================================================ -->
+    <div class="tab-panel" data-tab="query">
+        <form class="query-composer" id="query-composer">
+            <div class="query-row">
+                <input type="text" id="query-text" class="query-input"
+                       placeholder="What does this document say about…?" required>
+                <select id="query-strategy" class="query-strategy-select"></select>
+                <input type="number" id="query-topk" value="5" min="1" max="20"
+                       class="query-topk" title="top_k">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+            <label class="query-toggle">
+                <input type="checkbox" id="query-restrict" checked>
+                Restrict to this document only
+            </label>
+        </form>
+        <div class="query-results" id="query-results"></div>
+    </div>
+
+</div>
+
+<!-- Cytoscape from CDN (graph viz) -->
+<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+
+<!-- Server-rendered config consumed by inspect.js (hydrated by inspect_config.js). -->
+<script id="knowledge-agent-config" type="application/json">
+{
+    "sourceSlug": "{{ source_slug }}",
+    "apiBase": "{% url 'knowledge_agent:explorer_documents' %}",
+    "activeStrategy": "{{ active_strategy|default:'hybrid' }}",
+    "allStrategies": [
+        "basic_vector", "bm25", "hybrid", "hyde", "parent_child",
+        "graphrag", "raptor", "ontology", "contextual",
+        "crag", "rag_fusion", "adaptive"
+    ],
+    "urls": {
+        "contextual":    "{% url 'knowledge_agent:api_source_contextual'   source_slug=source_slug %}",
+        "parentChild":   "{% url 'knowledge_agent:api_source_parent_child' source_slug=source_slug %}",
+        "graph":         "{% url 'knowledge_agent:api_source_graph'        source_slug=source_slug %}",
+        "raptor":        "{% url 'knowledge_agent:api_source_raptor'       source_slug=source_slug %}",
+        "ontology":      "{% url 'knowledge_agent:api_source_ontology'     source_slug=source_slug %}",
+        "query":         "{% url 'knowledge_agent:api_source_query'        source_slug=source_slug %}",
+        "entitySources": "/knowledge/api/entity/__ENTITY_ID__/sources/"
+    }
+}
+</script>
+
+<!-- Inspect JS module — handles all tab interactions -->
+<script src="{% static 'knowledge_agent/js/inspect_config.js' %}"></script>
+<script src="{% static 'knowledge_agent/js/inspect.js' %}"></script>
+<script src="{% static 'knowledge_agent/js/source_detail.js' %}"></script>
+
+{% endblock %}

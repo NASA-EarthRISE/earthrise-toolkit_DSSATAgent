@@ -1,0 +1,126 @@
+/* Event-table widget — shared by wizard, DSSAT Preferences, DSSAT System Config */
+
+.event-table-widget {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.event-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.event-table thead th {
+    text-align: left;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    padding: 0.5rem 0.6rem;
+    background: var(--color-bg);
+    border-bottom: 1px solid var(--glass-border);
+    font-weight: 600;
+}
+
+.event-table tbody td {
+    padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--glass-border);
+    vertical-align: top;
+}
+
+.event-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.event-field {
+    width: 100%;
+    padding: 0.4rem 0.55rem;
+    background: var(--color-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.35rem;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+    box-sizing: border-box;
+}
+
+.event-field:focus {
+    outline: 1px dotted var(--color-focus);
+    border-color: var(--color-focus);
+    background: var(--color-surface);
+}
+
+select.event-field {
+    cursor: pointer;
+}
+
+select.event-field option {
+    background: var(--color-surface);
+    color: var(--text-primary);
+}
+
+/* Curated-dropdown wrapper: select + toggle side-by-side */
+.curated-dropdown-wrapper {
+    display: flex;
+    gap: 0.3rem;
+    align-items: center;
+}
+
+.curated-dropdown-wrapper select.event-field {
+    flex: 1;
+    min-width: 0;
+}
+
+.btn-toggle-curated {
+    flex-shrink: 0;
+    padding: 0.25rem 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.3rem;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+}
+
+.btn-toggle-curated:hover {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-primary);
+}
+
+.event-row-remove {
+    padding: 0.2rem 0.5rem;
+    background: transparent;
+    border: 1px solid color-mix(in srgb, var(--color-hover) 30%, transparent);
+    border-radius: 0.3rem;
+    color: var(--color-hover);
+    font-size: 1rem;
+    cursor: pointer;
+    line-height: 1;
+    transition: all 0.15s;
+}
+
+.event-row-remove:hover {
+    background: color-mix(in srgb, var(--color-hover) 10%, transparent);
+}
+
+.btn-add-event {
+    display: block;
+    width: calc(100% - 1.2rem);
+    margin: 0.6rem;
+    padding: 0.5rem 0.8rem;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--color-primary) 35%, transparent);
+    border-radius: 0.4rem;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-add-event:hover {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border-color: var(--primary-color);
+}

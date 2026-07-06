@@ -1,0 +1,21 @@
+{% extends "shell/_base_skeleton.html" %}
+{% load static %}
+{% block title %}Registration Submitted - {{ agent_name }}{% endblock %}
+{% block body_class %}chat-page{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'accounts/css/auth.css' %}">{% endblock %}
+{% block sitewide_feedback %}{% endblock %}
+
+{% block body %}
+    <div class="auth-container">
+        <div class="auth-card">
+            <h1 class="auth-title">Request Submitted</h1>
+            <div class="auth-success">
+                Your account request has been submitted and is pending administrator approval.
+                You will receive an email when your account is activated.
+            </div>
+            <div class="auth-links">
+                <a href="{% url 'accounts:login' %}">Return to login</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

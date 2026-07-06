@@ -1,0 +1,40 @@
+{% comment %}
+    Username dropdown with a per-agent grouped menu. Consumed by both
+    `nav.html` (standard page nav bar) and `home.html` (floating user
+    pill). Expects ``user_menu_items`` in context (populated by
+    `chat.context_processors.management_items`) and ``user`` from the
+    auth context processor.
+
+    Optional outer-wrapper class overrides — pass ``extra_class`` via
+    the ``{% include ... with extra_class="..." %}`` syntax to layer on
+    positioning / styling (e.g. a floating pill on the home page).
+
+    The dropdown is keyboard- and screen-reader-friendly: the toggle
+    sits in tab order, the caret is an explicit glyph, and opening is
+    driven by CSS :focus-within + :hover (existing .nav-dropdown
+    pattern from nav.html).
+{% endcomment %}
+{% if user.is_authenticated %}
+<div class="nav-dropdown nav-user-dropdown {{ extra_class|default:'' }}">
+    <button type="button"
+            class="nav-user-toggle {% if active_nav == 'user' %}active{% endif %}">
+        <span class="nav-user-name">{{ user.get_short_name|default:user.username }}</span>
+        <span class="nav-user-caret" aria-hidden="true">▾</span>
+    </button>
+    <div class="nav-dropdown-menu nav-user-menu">
+        {% regroup user_menu_items by agent_display as user_sections %}
+        {% for section in user_sections %}
+            {% if not forloop.first %}<div class="nav-divider"></div>{% endif %}
+            <div class="nav-section-label">{{ section.grouper }}</div>
+            {% for item in section.list %}
+            <a href="{{ item.url }}">{{ item.label }}</a>
+            {% endfor %}
+        {% endfor %}
+        {% if user_menu_items %}<div class="nav-divider"></div>{% endif %}
+        <form method="post" action="{% url 'accounts:logout' %}" class="nav-logout-form">
+            {% csrf_token %}
+            <button type="submit" class="nav-logout-item">Logout</button>
+        </form>
+    </div>
+</div>
+{% endif %}

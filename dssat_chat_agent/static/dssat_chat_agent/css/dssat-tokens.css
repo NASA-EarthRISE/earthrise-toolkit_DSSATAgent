@@ -1,0 +1,13 @@
+/* ===========================================================================
+   DSSAT product design-token overrides.
+
+   This sheet is loaded globally via the shell's `product_css` block (see
+   dssat_chat_agent/templates/shell/base.html) and is the sanctioned seam for a
+   product to override the framework's :root design tokens
+   (earthrise_agents_base/css/chat.css) WITHOUT editing the platform.
+
+   It is intentionally EMPTY: the DSSAT product uses the stock NASA Horizon
+   Design System palette that the framework already ships, so there is nothing
+   to override. A rebranded product (e.g. acme_chat_agent) would put its own
+   `:root { --color-primary: ...; ... }` here to retheme every page.
+   =========================================================================== */

@@ -1,0 +1,157 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}User Management{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/management.css' %}">
+<link rel="stylesheet" href="{% static 'accounts/css/user_management.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'accounts/js/user_management.js' %}"></script>
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="management" %}
+
+<div class="mgmt-container">
+    <div class="mgmt-header">
+        <h1>User Management</h1>
+        <p class="subtitle">Manage users, roles, and registration requests</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="mgmt-tabs">
+        <button class="mgmt-tab active" data-tab="pending">
+            Pending Requests{% if pending_requests %} ({{ pending_requests|length }}){% endif %}
+        </button>
+        <button class="mgmt-tab" data-tab="users">All Users</button>
+    </div>
+
+    <!-- Pending Requests -->
+    <div class="tab-panel active" id="tab-pending">
+        {% if pending_requests %}
+        <div class="mgmt-card">
+            <table class="mgmt-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Organization</th>
+                        <th>Reason</th>
+                        <th>Requested Roles</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for req in pending_requests %}
+                    <tr id="req-{{ req.pk }}">
+                        <td>{{ req.user.get_full_name }}</td>
+                        <td>{{ req.user.email }}</td>
+                        <td>{{ req.organization }}</td>
+                        <td>{{ req.reason|truncatewords:15 }}</td>
+                        <td>
+                            {% for role in req.requested_roles %}
+                            <span class="role-tag">{{ role }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>{{ req.created_at|date:"M j, Y" }}</td>
+                        <td>
+                            <button class="btn-sm btn-approve"
+                                    data-action="approve" data-req-id="{{ req.pk }}">
+                                Approve
+                            </button>
+                            <button class="btn-sm btn-reject"
+                                    data-action="reject" data-req-id="{{ req.pk }}">
+                                Reject
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="mgmt-card">
+            <p class="mgmt-empty">No pending registration requests.</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- All Users -->
+    <div class="tab-panel" id="tab-users">
+        <div class="mgmt-card">
+            <table class="mgmt-table">
+                <thead>
+                    <tr>
+                        <th>Username</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Roles</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for u in users %}
+                    <tr id="user-{{ u.pk }}">
+                        <td>{{ u.username }}</td>
+                        <td>{{ u.get_full_name }}</td>
+                        <td>{{ u.email }}</td>
+                        <td>
+                            <div class="role-tags">
+                                {% if u.is_superuser %}
+                                <span class="role-tag role-tag-superuser">Superuser</span>
+                                {% endif %}
+                                {% for g in u.groups.all %}
+                                <span class="role-tag">{{ g.name }}</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if u.is_active %}
+                            <span class="status-pill status-active">Active</span>
+                            {% else %}
+                            <span class="status-pill status-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ u.date_joined|date:"M j, Y" }}</td>
+                        <td>
+                            <button class="btn-sm" data-action="edit-roles" data-user-id="{{ u.pk }}">
+                                Edit Roles
+                            </button>
+                            {% if u.pk != request.user.pk %}
+                            <button class="btn-sm"
+                                    data-action="toggle-active" data-user-id="{{ u.pk }}">
+                                {% if u.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Role Edit Modal -->
+<div id="role-modal" class="role-modal">
+    <div class="mgmt-card role-modal-card">
+        <h2>Edit Roles</h2>
+        <div id="role-checkboxes" class="role-checkboxes"></div>
+        <div class="role-modal-actions">
+            <button class="btn-sm btn-approve" data-action="save-roles">Save</button>
+            <button class="btn-sm" data-action="close-modal">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<script id="grouped-roles-data" type="application/json">{{ grouped_roles_json|safe }}</script>
+{% endblock %}

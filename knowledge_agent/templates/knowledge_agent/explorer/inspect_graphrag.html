@@ -1,0 +1,66 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge — GraphRAG inspector{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/knowledge.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/inspect.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="strategies" active_agent="knowledge_agent" %}
+
+<div class="explorer-container">
+
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'knowledge_agent:explorer_index' %}" class="breadcrumb">Strategies</a>
+            <h1>GraphRAG — corpus knowledge graph</h1>
+            <p class="subtitle">
+                Whole-tenant entity graph. Nodes are entities deduplicated
+                across documents; edges are LLM-extracted relationships.
+            </p>
+        </div>
+    </div>
+
+    <div class="inspect-page">
+        <div class="graph-toolbar">
+            <span class="label-sm">Filter by entity type:</span>
+            <div class="filter-chips" id="graph-filter-chips"></div>
+            <label class="label-sm">Max edges</label>
+            <input type="number" id="graph-max-edges" value="2000" min="100" max="10000"
+                   class="depth-input">
+            <button class="btn btn-xs" id="graph-reload">Reload</button>
+            <span class="graph-stats" id="graph-stats"></span>
+        </div>
+
+        <div class="graph-canvas" id="graphrag-canvas"></div>
+
+        <div class="graph-detail">
+            <h4>Selected entity</h4>
+            <div class="graph-detail-body" id="graph-detail-body">
+                <em>Click a node to inspect.</em>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script src="https://unpkg.com/cytoscape@3.30.2/dist/cytoscape.min.js"></script>
+<script id="knowledge-inspect-config" type="application/json">
+{
+    "mode": "corpus",
+    "urls": {
+        "graph":         "{% url 'knowledge_agent:api_inspect_graphrag' %}",
+        "entitySources": "/knowledge/api/entity/__ENTITY_ID__/sources/"
+    }
+}
+</script>
+<script src="{% static 'knowledge_agent/js/inspect_config.js' %}"></script>
+<script src="{% static 'knowledge_agent/js/inspect.js' %}"></script>
+
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends "shell/base.html" %}
+{% block title %}Soils Explorer - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/soils.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="soils" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <h1>Soil Profiles</h1>
+        <div class="header-actions">
+            <a href="{% url 'dssat_agent:soil_create' %}" class="btn btn-primary">+ Create Soil</a>
+            <a href="{% url 'dssat_agent:soil_from_texture' %}" class="btn btn-secondary">+ From Texture</a>
+        </div>
+    </div>
+
+    <div class="filter-controls">
+        <form class="filter-left" id="filter-form">
+            <input type="text" name="search" placeholder="Search by name or ID..." class="filter-input" id="filter-search">
+            <input type="text" name="source" placeholder="Source..." class="filter-input filter-sm" id="filter-source">
+            <input type="text" name="country" placeholder="Country..." class="filter-input filter-sm" id="filter-country">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a href="#" class="btn btn-ghost is-hidden" id="clear-filters">Clear</a>
+        </form>
+        <div class="filter-right">
+            <div>
+                <label class="pagination-info" for="page-size">Show:</label>
+                <select class="page-size-select" id="page-size">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="result-count" id="result-count">Loading...</div>
+        </div>
+    </div>
+
+    <div class="data-table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Soil ID</th>
+                    <th>Name</th>
+                    <th>Source</th>
+                    <th>Country</th>
+                    <th>Texture</th>
+                    <th>Layers</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="soils-tbody">
+                <tr class="loading-row"><td colspan="7">Loading soil profiles...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-bar is-hidden" id="pagination-bar">
+        <div class="pagination-info" id="pagination-info"></div>
+        <div class="page-numbers" id="page-numbers"></div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    <script src="{% static 'dssat_agent/js/soils.js' %}"></script>
+{% endblock %}

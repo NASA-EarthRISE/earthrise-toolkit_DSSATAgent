@@ -1,0 +1,70 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge Preferences{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/management.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/preferences.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'knowledge_agent/js/preferences.js' %}"></script>
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="user" %}
+
+<div class="mgmt-container">
+    <div class="mgmt-header">
+        <h1>Knowledge Preferences</h1>
+        <p class="subtitle">Your personal Knowledge agent preferences. Falls back to system defaults when not set.</p>
+    </div>
+
+    <div class="mgmt-card">
+        <h2>Preferred Retrieval Strategy</h2>
+        <p class="prefs-strategy-note">
+            When you ask knowledge questions, this strategy will be used by default.
+            System default: <strong>{{ system_strategy }}</strong>.
+            {% if user_strategy %}
+            <br>You currently override with: <strong>{{ user_strategy }}</strong>.
+            {% else %}
+            <br>You are currently inheriting the system default.
+            {% endif %}
+        </p>
+
+        <form class="mgmt-form" id="knowledge-prefs-form">
+            <div class="strategy-list">
+                <label class="strategy-item">
+                    <input type="radio" name="preferred_strategy" value="" {% if not user_strategy %}checked{% endif %}>
+                    <div>
+                        <strong>Use system default ({{ system_strategy }})</strong>
+                        <span class="helptext">Inherit whatever strategy the system is configured for.</span>
+                    </div>
+                </label>
+
+                {% for s in strategies %}
+                <label class="strategy-item">
+                    <input type="radio" name="preferred_strategy" value="{{ s.name }}" {% if user_strategy == s.name %}checked{% endif %} {% if not s.ready %}disabled{% endif %}>
+                    <div>
+                        <strong>
+                            {{ s.name }}
+                            {% if not s.ready %}<span class="pill not-ready">not ready</span>
+                            {% else %}<span class="pill ready">ready</span>
+                            {% endif %}
+                        </strong>
+                        <span class="helptext">{{ s.description|truncatewords:30 }}</span>
+                    </div>
+                </label>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn-primary save-pref-btn">Save Preference</button>
+            <div class="save-banner"></div>
+        </form>
+    </div>
+</div>
+{% endblock %}

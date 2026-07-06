@@ -1,0 +1,163 @@
+{% extends "shell/base.html" %}
+{% block title %}Data Sources Explorer - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'data_agent/css/data_explorer.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.css" />
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="weather" active_agent="data_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <h1>Data Sources Explorer</h1>
+        <p class="subtitle">Inspect registered raster datasets. Check local and remote availability for any source, date range, and location.</p>
+    </div>
+
+    <div class="detail-grid stacked">
+        <div class="detail-card">
+            <h3>Data Availability</h3>
+            <div id="data-check-form">
+                <!-- Source selector -->
+                <div class="form-group">
+                    <label for="data-source">Data Source</label>
+                    <select id="data-source" class="form-input">
+                        <option value="">Loading sources…</option>
+                    </select>
+                    <p class="form-hint" id="data-source-hint">Pick a source to see its variables and check availability.</p>
+                    <div class="no-data-warning" id="source-no-data-warning">&#x26D4; No data loaded for this source</div>
+                </div>
+
+                <!-- Date range with custom calendars -->
+                <div id="data-date-row" class="dx-date-row">
+                    <label>Date Range</label>
+                    <div class="dx-date-inputs">
+                        <span class="dx-date-label">From</span>
+                        <div class="pos-rel-ib">
+                            <button type="button" class="cal-trigger" id="start-trigger">—</button>
+                            <input type="hidden" id="start-date">
+                            <div class="cal-dropdown is-hidden" id="start-cal"></div>
+                        </div>
+                        <span class="dx-date-label">To</span>
+                        <div class="pos-rel-ib">
+                            <button type="button" class="cal-trigger" id="end-trigger">—</button>
+                            <input type="hidden" id="end-date">
+                            <div class="cal-dropdown is-hidden" id="end-cal"></div>
+                        </div>
+                    </div>
+                    <div class="avail-fraction" id="avail-fraction"></div>
+                </div>
+
+                <!-- Location selection with mini map -->
+                <div class="form-group dx-loc-group">
+                    <label>Location (optional)</label>
+                    <div class="tab-bar dx-loc-tabs" id="location-type-toggle">
+                        <button type="button" class="tab active" data-location-type="bbox">Bounding Box</button>
+                        <button type="button" class="tab" data-location-type="point">Point</button>
+                        <button type="button" class="tab" data-location-type="admin">Admin Boundary</button>
+                    </div>
+                </div>
+
+                <!-- Mini Leaflet map -->
+                <div id="location-map"></div>
+
+                <!-- Bbox inputs -->
+                <div id="location-bbox-inputs">
+                    <div class="form-grid cols-4">
+                        <div class="form-group">
+                            <label for="bbox-west">West</label>
+                            <input type="number" step="any" id="bbox-west" class="form-input" placeholder="-180">
+                            <div class="field-hint">-180 to 180</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bbox-south">South</label>
+                            <input type="number" step="any" id="bbox-south" class="form-input" placeholder="-90">
+                            <div class="field-hint">-90 to 90</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bbox-east">East</label>
+                            <input type="number" step="any" id="bbox-east" class="form-input" placeholder="180">
+                            <div class="field-hint">-180 to 180</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="bbox-north">North</label>
+                            <input type="number" step="any" id="bbox-north" class="form-input" placeholder="90">
+                            <div class="field-hint">-90 to 90</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Point inputs -->
+                <div id="location-point-inputs" class="is-hidden">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="point-lat">Latitude</label>
+                            <input type="number" step="any" id="point-lat" class="form-input" placeholder="0.0">
+                            <div class="field-hint">-90 to 90</div>
+                        </div>
+                        <div class="form-group">
+                            <label for="point-lon">Longitude</label>
+                            <input type="number" step="any" id="point-lon" class="form-input" placeholder="0.0">
+                            <div class="field-hint">-180 to 180</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin inputs -->
+                <div id="location-admin-inputs" class="is-hidden">
+                    <div class="form-group">
+                        <label for="admin-level">Admin Level</label>
+                        <select id="admin-level" class="form-input">
+                            <option value="country">Country</option>
+                            <option value="admin1">States</option>
+                            <option value="admin2" selected>Counties</option>
+                        </select>
+                        <p class="form-hint" id="admin-hint">Click a boundary on the map to select it.</p>
+                    </div>
+                    <input type="hidden" id="admin-geometry">
+                    <input type="hidden" id="admin-label">
+                </div>
+
+                <!-- Results (inline, same card) -->
+                <div id="data-results" class="dx-results"></div>
+
+                <!-- Check at Source button + remote results -->
+                <button type="button" class="btn btn-secondary btn-sm is-hidden" id="check-remote-btn">
+                    Check at Source
+                </button>
+                <div id="remote-check-results"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registered sources table -->
+    <div class="detail-card dx-sources-card">
+        <h3>Registered Data Sources</h3>
+        <p class="subtitle dx-sources-subtitle">All registered raster datasets known to the system.</p>
+        <div class="data-table-wrapper">
+            <table class="data-table" id="data-sources-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Variables</th>
+                        <th>Source variables</th>
+                        <th>Resolution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td colspan="4" class="empty-state small">Loading…</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-draw@1.0.4/dist/leaflet.draw.js"></script>
+    {% load static %}
+    <script src="{% static 'data_agent/js/data_explorer.js' %}"></script>
+{% endblock %}

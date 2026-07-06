@@ -1,0 +1,380 @@
+/* Styles specific to DSSAT Preferences and DSSAT System Config pages */
+
+/* 4-column grid for sim-options output flags */
+.mgmt-form .form-grid-4 {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+@media (max-width: 900px) {
+    .mgmt-form .form-grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 500px) {
+    .mgmt-form .form-grid-4 { grid-template-columns: 1fr; }
+}
+
+/* Subsection header inside a tab */
+.mgmt-form .section-subheader {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 1.25rem 0 0.5rem;
+    padding-bottom: 0.35rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+/* Fallback collapsible sections */
+.fallback-section {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    margin-bottom: 0.6rem;
+    overflow: hidden;
+}
+
+.fallback-section > summary {
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.fallback-section > summary::-webkit-details-marker { display: none; }
+
+.fallback-section > summary::before {
+    content: '▸';
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    transition: transform 0.15s;
+}
+
+.fallback-section[open] > summary::before {
+    transform: rotate(90deg);
+}
+
+.fallback-section > summary h3 {
+    display: inline;
+    margin: 0;
+    padding: 0;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border: none;
+}
+
+.fallback-section[open] > summary {
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.fallback-section > .form-grid {
+    padding: 0.8rem;
+}
+
+/* Reusable crop card (used by My Crops, System Per-Crop Defaults, Curated Dropdowns). */
+.crop-card {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.6rem;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+/* Header: clear highlighted band with the title on the left and toggle on the right.
+ * Background uses the primary accent at low alpha so it reads as a "title bar"
+ * distinct from the body, without looking permanently hovered. */
+.crop-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+    border-bottom: 1px solid var(--glass-border);
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.15s;
+}
+
+.crop-card-header:hover {
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+
+.crop-card-header .crop-card-title {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin: 0;
+    padding: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    border: none;
+    flex: 1;
+    min-width: 0;
+}
+
+.crop-card-header .crop-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.crop-card-header .crop-code-pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    background: color-mix(in srgb, var(--color-primary) 16%, transparent);
+    color: var(--primary-color);
+    border-radius: 0.3rem;
+    font-size: 0.78rem;
+    font-family: monospace;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.crop-card-header .toggle-icon {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.crop-card-body {
+    padding: 1rem;
+    background: var(--color-surface);
+}
+
+.crop-card-body.collapsed,
+.crop-card-footer.collapsed {
+    display: none;
+}
+
+.crop-card-footer {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface);
+    border-top: 1px solid var(--glass-border);
+}
+
+.crop-card.is-saving { opacity: 0.7; pointer-events: none; }
+
+/* .crop-card-actions — action-button row on a crop card. */
+.crop-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+.crop-mgmt-tabs {
+    display: flex;
+    gap: 0.25rem;
+    margin: 1rem 0 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    flex-wrap: wrap;
+}
+
+.crop-mgmt-tab {
+    padding: 0.4rem 0.8rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+}
+
+.crop-mgmt-tab:hover {
+    color: var(--text-secondary);
+}
+
+.crop-mgmt-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.crop-mgmt-panel { display: none; margin-top: 0.5rem; }
+.crop-mgmt-panel.active { display: block; }
+
+/* Management practices tab widget (used in Preferences/System Config tabs 3 & 4) */
+.management-practices-widget {
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.mp-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    background: rgba(0, 0, 0, 0.03);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.mp-tab {
+    padding: 0.55rem 1rem;
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    font-family: inherit;
+}
+
+.mp-tab:hover {
+    color: var(--text-primary);
+    background: rgba(0, 0, 0, 0.03);
+}
+
+.mp-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.mp-panels {
+    padding: 0.9rem;
+}
+
+.mp-panel {
+    display: none;
+}
+
+.mp-panel.active {
+    display: block;
+}
+
+/* Save banner */
+.save-banner {
+    padding: 0.5rem 0.8rem;
+    margin-top: 0.75rem;
+    border-radius: 0.4rem;
+    font-size: 0.85rem;
+    display: none;
+}
+
+.save-banner.success {
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.35);
+    color: #15803d;
+    display: block;
+}
+
+.save-banner.error {
+    background: color-mix(in srgb, var(--color-hover) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-hover) 35%, transparent);
+    color: var(--color-hover);
+    display: block;
+}
+
+/* Crop picker modal */
+.crop-picker-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+
+.crop-picker-modal.open {
+    display: flex;
+}
+
+.crop-picker-dialog {
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    max-width: 480px;
+    width: 90%;
+    max-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.crop-picker-search {
+    width: 100%;
+    margin-bottom: 0.75rem;
+    padding: 0.5rem 0.7rem;
+    background: var(--color-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    color: var(--text-primary);
+}
+
+.crop-picker-list {
+    flex: 1;
+    overflow-y: auto;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    padding: 0.25rem;
+}
+
+.crop-picker-item {
+    padding: 0.5rem 0.7rem;
+    cursor: pointer;
+    border-radius: 0.3rem;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+.crop-picker-item:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.crop-picker-item .code {
+    font-family: monospace;
+    color: var(--primary-color);
+    min-width: 3ch;
+}
+
+.crop-picker-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+/* ==========================================================================
+   Inline style="" attribute replacements (config tabs / _config_tabs.html)
+   ========================================================================== */
+.mgmt-card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+.mgmt-card-head h2 {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+.mgmt-card-note {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+}
+.mgmt-card-note.spaced {
+    margin-bottom: 1rem;
+}
+.mgmt-card-actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+}

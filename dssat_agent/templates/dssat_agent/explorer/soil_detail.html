@@ -1,0 +1,119 @@
+{% extends "shell/base.html" %}
+{% block title %}Soil {{ soil_id }} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="soils" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:explorer_soils' %}" class="breadcrumb">&larr; All Soils</a>
+            <h1>{{ profile.name|default:soil_id }}</h1>
+            <span class="subtitle mono">{{ soil_id }}</span>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'dssat_agent:soil_download_sol' soil_id=soil_id %}" class="btn btn-primary">Download .SOL</a>
+        </div>
+    </div>
+
+    {% if profile.error %}
+    <div class="alert alert-error">{{ profile.error }}</div>
+    {% else %}
+
+    <div class="detail-grid">
+        <div class="detail-card">
+            <h3>Profile Properties</h3>
+            <dl class="detail-list">
+                <dt>Soil ID</dt><dd class="mono">{{ profile.soil_id|default:soil_id }}</dd>
+                <dt>Name</dt><dd>{{ profile.name|default:"—" }}</dd>
+                <dt>Source</dt><dd>{{ profile.source|default:"—" }}</dd>
+                <dt>Country</dt><dd>{{ profile.country|default:"—" }}</dd>
+                <dt>Texture</dt><dd>{{ profile.texture|default:"—" }}</dd>
+                <dt>Classification</dt><dd>{{ profile.classification|default:"—" }}</dd>
+                <dt>Albedo (SALB)</dt><dd>{{ profile.salb|default:"—" }}</dd>
+                <dt>Evap Limit (SLU1)</dt><dd>{{ profile.slu1|default:"—" }}</dd>
+                <dt>Drainage (SLDR)</dt><dd>{{ profile.sldr|default:"—" }}</dd>
+                <dt>Runoff Curve (SLRO)</dt><dd>{{ profile.slro|default:"—" }}</dd>
+                <dt>N Fertility (SLNF)</dt><dd>{{ profile.slnf|default:"—" }}</dd>
+                <dt>P Factor (SLPF)</dt><dd>{{ profile.slpf|default:"—" }}</dd>
+            </dl>
+        </div>
+
+        <div class="detail-card wide">
+            <div class="card-header-row">
+                <h3>Soil Layers ({{ profile.layers|length|default:"0" }})</h3>
+                <button class="btn btn-sm btn-primary" id="add-layer-btn">+ Add Layer</button>
+            </div>
+
+            {% if profile.layers %}
+            <div class="data-table-wrapper">
+                <table class="data-table compact">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Depth (cm)</th>
+                            <th>Clay %</th>
+                            <th>Silt %</th>
+                            <th>Bulk Den.</th>
+                            <th>Org. C.</th>
+                            <th>LL</th>
+                            <th>DUL</th>
+                            <th>SAT</th>
+                            <th>KSAT</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for layer in profile.layers %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td>{{ layer.sllb|default:"—" }}</td>
+                            <td>{{ layer.slcl|default:"—" }}</td>
+                            <td>{{ layer.slsi|default:"—" }}</td>
+                            <td>{{ layer.sbdm|default:"—" }}</td>
+                            <td>{{ layer.sloc|default:"—" }}</td>
+                            <td>{{ layer.slll|default:"—" }}</td>
+                            <td>{{ layer.sldul|default:"—" }}</td>
+                            <td>{{ layer.slsat|default:"—" }}</td>
+                            <td>{{ layer.sksat|default:"—" }}</td>
+                            <td class="action-cell">
+                                <button class="btn btn-xs edit-layer-btn" data-idx="{{ forloop.counter0 }}">Edit</button>
+                                <button class="btn btn-xs btn-danger delete-layer-btn" data-idx="{{ forloop.counter0 }}">Del</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state small">
+                <p>No layers defined. Add layers to complete this soil profile.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add/Edit Layer Modal -->
+    <div class="modal-overlay is-hidden" id="layer-modal">
+        <div class="modal-card">
+            <h3 id="layer-modal-title">Add Soil Layer</h3>
+            {% include "dssat_agent/partials/soil_layer_form.html" %}
+            <div class="modal-actions">
+                <button class="btn btn-ghost" id="cancel-layer-btn">Cancel</button>
+                <button class="btn btn-primary" id="save-layer-btn">Save Layer</button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+    const SOIL_ID = "{{ soil_id }}";
+    const BASE_PATH = "{{ base_path|default:'/' }}";
+</script>
+{% load static %}
+<script src="{% static 'dssat_agent/js/soil_explorer.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "earthrise_agents_base/_chat_page.html" %}
+{% comment %}
+DSSAT chat page branding override.
+
+Shadows earthrise_agents_base/templates/earthrise_agents_base/chat.html
+because dssat_chat_agent is listed BEFORE earthrise_agents_base in
+INSTALLED_APPS. Extends the same private _chat_page.html skeleton and
+fills the branding blocks with DSSAT-specific welcome content.
+{% endcomment %}
+
+{% comment %}
+    Fill the standalone chat page's product hooks so DSSAT design tokens reach
+    the chat screen, which does not inherit shell/base.html. (Per-agent accent
+    colors now come from each agent's AppConfig via window.AGENT_VISUALS.)
+{% endcomment %}
+{% block product_css %}{% load static %}<link rel="stylesheet" href="{% static 'dssat_chat_agent/css/dssat-tokens.css' %}">{% endblock %}
+
+{% block welcome_logo %}🌾{% endblock %}
+
+{% block welcome_subtitle %}Multi-crop simulation assistant powered by DSSAT{% endblock %}
+
+{% block welcome_features %}
+                    <div class="welcome-features">
+                        <div class="feature-card">
+                            <div class="feature-icon">🧪</div>
+                            <div class="feature-title">18 Crops</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">📊</div>
+                            <div class="feature-title">Analyze Results</div>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">🏔</div>
+                            <div class="feature-title">Soil Management</div>
+                        </div>
+                    </div>
+{% endblock %}
+
+{% block chat_placeholder %}Ask about crop experiments, yields, soils, or DSSAT...{% endblock %}

@@ -1,0 +1,193 @@
+{% extends "shell/base.html" %}
+{% block title %}Experiment Detail - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/experiment_detail.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="experiments" active_agent="dssat_agent" %}
+<div class="explorer-container">
+
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:experiment_list' %}" class="breadcrumb">&larr; All Experiments</a>
+            <h1>{{ experiment.title|default:"Experiment Detail" }}</h1>
+            <span class="subtitle">{{ experiment_id|truncatechars:36 }}</span>
+        </div>
+        {% if experiment.chat_url %}
+        <a href="{{ experiment.chat_url }}" class="btn btn-sm">Back to Chat</a>
+        {% endif %}
+    </div>
+
+    {% if experiment.error %}
+    <div class="empty-state">
+        <h3>Error loading experiment</h3>
+        <p>{{ experiment.error }}</p>
+    </div>
+    {% else %}
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+        <button class="tab active" data-tab="tab-summary">Summary</button>
+        <button class="tab" data-tab="tab-results">Results & Files</button>
+        <button class="tab" data-tab="tab-params">Parameters</button>
+    </div>
+
+    <!-- Summary Tab -->
+    <div class="tab-content active" id="tab-summary">
+        <div class="detail-grid">
+            <div class="detail-card">
+                <h3>Experiment Info</h3>
+                <dl class="detail-list">
+                    <dt>Status</dt>
+                    <dd><span class="status-pill status-{{ experiment.status }}">{{ experiment.status }}</span></dd>
+                    <dt>Type</dt>
+                    <dd><span class="mono">{{ experiment.experiment_type }}</span></dd>
+                    <dt>Crop</dt>
+                    <dd class="mono">{{ experiment.crop_code|default:"--" }}</dd>
+                    <dt>Cultivar</dt>
+                    <dd class="mono">{{ experiment.cultivar_code|default:"--" }}</dd>
+                    <dt>Soil</dt>
+                    <dd class="mono">{{ experiment.soil_profile|default:"inline" }}</dd>
+                    <dt>Created</dt>
+                    <dd>{{ experiment.created_at|truncatechars:19 }}</dd>
+                    <dt>Updated</dt>
+                    <dd>{{ experiment.updated_at|truncatechars:19 }}</dd>
+                    <dt>Results</dt>
+                    <dd>{{ experiment.results|length }}</dd>
+                </dl>
+            </div>
+
+            {% if experiment.aggregate_summary %}
+            <div class="detail-card wide">
+                <h3>Aggregate Summary</h3>
+                <pre class="file-content-viewer pre-scroll-300">{{ experiment.aggregate_summary|pprint }}</pre>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Results & Files Tab -->
+    <div class="tab-content" id="tab-results">
+        {% if experiment.results %}
+            {% for r in experiment.results %}
+            <div class="detail-card wide result-card">
+                <div class="card-header-row">
+                    <h3>Result #{{ forloop.counter }}{% if r.completed_at %} <span class="subtitle fw-normal">{{ r.completed_at|truncatechars:19 }}</span>{% endif %}</h3>
+                    {% if r.has_dssat_files %}
+                    <a href="{{ subpath_prefix }}/dssat/api/experiments/{{ experiment_id }}/results/{{ r.id }}/files/zip/"
+                       class="btn btn-sm btn-primary">Download All (ZIP)</a>
+                    {% endif %}
+                </div>
+
+                <!-- Summary key-value pairs -->
+                {% if r.summary %}
+                <div class="mb-12">
+                    {% for key, value in r.summary.items %}
+                    <span class="mono summary-kv">{{ key }}: {{ value }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                {% if r.overview %}
+                <details class="mb-12">
+                    <summary class="overview-summary">Overview</summary>
+                    <pre class="file-content-viewer pre-scroll-200">{{ r.overview }}</pre>
+                </details>
+                {% endif %}
+
+                {% if r.dssat_files_listing %}
+                <!-- Input Files -->
+                {% if r.dssat_files_listing.input %}
+                <h4 class="files-heading">Input Files</h4>
+                <div class="data-table-wrapper">
+                    <table class="data-table compact">
+                        <thead>
+                            <tr><th>File</th><th>Size</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for key, size in r.dssat_files_listing.input.items %}
+                            <tr>
+                                <td class="mono">{{ key }}</td>
+                                <td>{{ size|filesizeformat }}</td>
+                                <td class="action-cell">
+                                    <button class="btn btn-xs view-file-btn"
+                                            data-type="input" data-key="{{ key }}" data-result-id="{{ r.id }}">View</button>
+                                    <a href="{{ subpath_prefix }}/dssat/api/experiments/{{ experiment_id }}/results/{{ r.id }}/files/input/{{ key }}/?download=1"
+                                       class="btn btn-xs">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+
+                <!-- Output Files -->
+                {% if r.dssat_files_listing.output %}
+                <h4 class="files-heading">Output Files</h4>
+                <div class="data-table-wrapper">
+                    <table class="data-table compact">
+                        <thead>
+                            <tr><th>File</th><th>Size</th><th></th></tr>
+                        </thead>
+                        <tbody>
+                            {% for key, size in r.dssat_files_listing.output.items %}
+                            <tr>
+                                <td class="mono">{{ key }}</td>
+                                <td>{{ size|filesizeformat }}</td>
+                                <td class="action-cell">
+                                    <button class="btn btn-xs view-file-btn"
+                                            data-type="output" data-key="{{ key }}" data-result-id="{{ r.id }}">View</button>
+                                    <a href="{{ subpath_prefix }}/dssat/api/experiments/{{ experiment_id }}/results/{{ r.id }}/files/output/{{ key }}/?download=1"
+                                       class="btn btn-xs">Download</a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% endif %}
+                {% elif not r.has_dssat_files %}
+                <p class="empty-state small mt-8">No DSSAT files captured for this result.</p>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <p class="empty-state small">No results recorded.</p>
+        {% endif %}
+    </div>
+
+    <!-- Parameters Tab -->
+    <div class="tab-content" id="tab-params">
+        <div class="detail-card wide">
+            <h3>Raw Parameters</h3>
+            {% if experiment.raw_params %}
+            <pre class="file-content-viewer pre-scroll-500">{{ experiment.raw_params|pprint }}</pre>
+            {% else %}
+            <p class="empty-state small">No parameters recorded.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+
+<!-- File Viewer Modal -->
+<div class="modal-overlay is-hidden" id="file-viewer-modal">
+    <div class="modal-card modal-wide">
+        <div class="card-header-row">
+            <h3 id="file-viewer-title">File Viewer</h3>
+            <button class="btn btn-ghost btn-sm" id="close-file-viewer">&times;</button>
+        </div>
+        <pre class="file-content-viewer" id="file-viewer-content">Loading...</pre>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    {{ experiment_id|json_script:"experiment-id" }}
+    <script src="{% static 'dssat_agent/js/experiment_detail.js' %}"></script>
+{% endblock %}

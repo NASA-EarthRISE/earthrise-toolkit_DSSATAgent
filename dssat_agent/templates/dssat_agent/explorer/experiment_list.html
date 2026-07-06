@@ -1,0 +1,66 @@
+{% extends "shell/base.html" %}
+{% block title %}Experiments - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="experiments" active_agent="dssat_agent" %}
+<div class="explorer-container">
+
+    <div class="explorer-header">
+        <div>
+            {% if chat_id %}
+            <a href="{% url 'dssat_agent:experiment_list' %}" class="breadcrumb">&larr; All Experiments</a>
+            <h1>Experiments for Chat</h1>
+            <span class="subtitle">Filtered to chat {{ chat_id|truncatechars:12 }}</span>
+            {% else %}
+            <h1>Experiment History</h1>
+            <p class="subtitle">Browse persisted DSSAT experiment sessions</p>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if experiments %}
+    <div class="data-table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Label</th>
+                    <th>Type</th>
+                    <th>Crop</th>
+                    <th>Chat</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exp in experiments %}
+                <tr>
+                    <td>{{ exp.label|default:"Unnamed" }}</td>
+                    <td><span class="mono">{{ exp.experiment_type }}</span></td>
+                    <td>{{ exp.crop_code|default:"--" }}</td>
+                    <td>
+                        {% if exp.chat_url %}
+                        <a href="{{ exp.chat_url }}">{{ exp.chat_title|default:exp.chat_id|truncatechars:30 }}</a>
+                        {% else %}--{% endif %}
+                    </td>
+                    <td>{{ exp.created_at|date:"M j, Y - g:i A" }}</td>
+                    <td>
+                        <a href="{% url 'dssat_agent:experiment_detail' experiment_id=exp.experiment_id %}" class="btn btn-sm">View</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">&#x1F9EA;</div>
+        <h3>No experiments yet</h3>
+        <p>Run a crop simulation through the chat or experiment wizard to see results here.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

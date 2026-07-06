@@ -1,0 +1,141 @@
+{% extends "shell/base.html" %}
+{% block title %}Create Soil - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="soils" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:explorer_soils' %}" class="breadcrumb">&larr; All Soils</a>
+            <h1>Create Soil Profile</h1>
+        </div>
+    </div>
+
+    <div class="tab-bar">
+        <button class="tab {% if not from_texture %}active{% endif %}" data-tab="manual">Manual Entry</button>
+        <button class="tab {% if from_texture %}active{% endif %}" data-tab="texture">From Texture</button>
+    </div>
+
+    <!-- Manual creation tab -->
+    <div class="tab-content {% if not from_texture %}active{% endif %}" id="tab-manual">
+        <form id="manual-form" class="create-form">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="soil_id">Soil ID</label>
+                    <input type="text" id="soil_id" name="soil_id" placeholder="e.g. MY00000001" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" placeholder="e.g. Sandy Loam Profile" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="source">Source</label>
+                    <input type="text" id="source" name="source" placeholder="e.g. custom" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="country">Country</label>
+                    <input type="text" id="country" name="country" placeholder="e.g. US" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="texture">Texture</label>
+                    <input type="text" id="texture" name="texture" placeholder="e.g. Sandy Loam" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="classification">Classification</label>
+                    <input type="text" id="classification" name="classification" class="form-input">
+                </div>
+            </div>
+
+            <h3>Profile Parameters</h3>
+            <div class="form-grid cols-3">
+                <div class="form-group">
+                    <label for="salb">Albedo (SALB)</label>
+                    <input type="number" id="salb" name="salb" value="0.13" step="0.01" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="slu1">Evap Limit (SLU1)</label>
+                    <input type="number" id="slu1" name="slu1" value="6.0" step="0.1" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="sldr">Drainage (SLDR)</label>
+                    <input type="number" id="sldr" name="sldr" value="0.60" step="0.01" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="slro">Runoff Curve (SLRO)</label>
+                    <input type="number" id="slro" name="slro" value="73.0" step="1" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="slnf">N Fertility (SLNF)</label>
+                    <input type="number" id="slnf" name="slnf" value="1.0" step="0.01" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="slpf">P Factor (SLPF)</label>
+                    <input type="number" id="slpf" name="slpf" value="1.0" step="0.01" class="form-input">
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg">Create Soil Profile</button>
+        </form>
+    </div>
+
+    <!-- From Texture tab -->
+    <div class="tab-content {% if from_texture %}active{% endif %}" id="tab-texture">
+        <form id="texture-form" class="create-form">
+            {% csrf_token %}
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="tex_soil_id">Soil ID</label>
+                    <input type="text" id="tex_soil_id" name="soil_id" placeholder="e.g. TX00000001" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="tex_name">Name</label>
+                    <input type="text" id="tex_name" name="name" placeholder="e.g. Auto-Generated Sandy Loam" class="form-input">
+                </div>
+            </div>
+
+            <h3>Soil Layers</h3>
+            <p class="help-text">Define layers by texture. Hydraulic properties will be auto-estimated.</p>
+
+            <div id="texture-layers">
+                <div class="texture-layer" data-index="0">
+                    <div class="form-grid cols-4">
+                        <div class="form-group">
+                            <label>Depth (cm)</label>
+                            <input type="number" name="depth" value="30" step="1" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Clay %</label>
+                            <input type="number" name="clay_pct" value="20" step="0.1" class="form-input clay-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Silt %</label>
+                            <input type="number" name="silt_pct" value="30" step="0.1" class="form-input silt-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Org. Carbon %</label>
+                            <input type="number" name="organic_carbon" value="1.5" step="0.01" class="form-input">
+                        </div>
+                    </div>
+                    <div class="estimate-preview" data-index="0"></div>
+                </div>
+            </div>
+
+            <div class="layer-actions">
+                <button type="button" class="btn btn-secondary" id="add-texture-layer">+ Add Layer</button>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg">Create from Texture</button>
+        </form>
+    </div>
+
+    <div id="create-result" class="result-panel is-hidden"></div>
+</div>
+
+{% load static %}
+<script src="{% static 'dssat_agent/js/soil_builder.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,63 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge — Ontology inspector{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/knowledge.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/inspect.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="strategies" active_agent="knowledge_agent" %}
+
+<div class="explorer-container">
+
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'knowledge_agent:explorer_index' %}" class="breadcrumb">Strategies</a>
+            <h1>Ontology — corpus OWL/RDF graph</h1>
+            <p class="subtitle">
+                Schema (TBox) from tenant config + individuals (ABox)
+                extracted by LLM classification per chunk.
+            </p>
+        </div>
+    </div>
+
+    <div class="inspect-page">
+        <div class="ontology-stats" id="ontology-stats"></div>
+
+        <div class="ontology-grid">
+            <section class="ontology-schema-pane">
+                <h3>Schema (TBox)</h3>
+                <div class="ontology-schema-body" id="ontology-schema-body">
+                    <em>Loading…</em>
+                </div>
+            </section>
+            <section class="ontology-individuals-pane">
+                <h3>Individuals (ABox)</h3>
+                <p class="hint">Grouped by class.</p>
+                <div class="ontology-individuals-body" id="ontology-individuals-body">
+                    <em>Loading…</em>
+                </div>
+            </section>
+        </div>
+    </div>
+
+</div>
+
+<script id="knowledge-inspect-config" type="application/json">
+{
+    "mode": "corpus",
+    "urls": {
+        "ontology": "{% url 'knowledge_agent:api_inspect_ontology' %}"
+    }
+}
+</script>
+<script src="{% static 'knowledge_agent/js/inspect_config.js' %}"></script>
+<script src="{% static 'knowledge_agent/js/inspect.js' %}"></script>
+
+{% endblock %}

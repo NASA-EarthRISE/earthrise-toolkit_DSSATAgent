@@ -1,0 +1,4 @@
+# The DSSAT RAG corpus is distributed out-of-band (large, ~285 MB) and is
+# gitignored (see .gitignore). This keepfile tracks the directory so the app
+# has its default mount/resolve path. Download the corpus from the public
+# Google Drive linked in the root README ("External data") and drop it here.

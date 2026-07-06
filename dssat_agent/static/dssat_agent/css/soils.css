@@ -1,0 +1,102 @@
+body {
+    overflow: auto;
+    height: auto;
+    min-height: 100vh;
+}
+.pagination-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.page-numbers {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+.page-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+.page-btn:hover:not(.active):not(:disabled) {
+    background: rgba(0, 0, 0, 0.05);
+    border-color: var(--color-primary);
+}
+.page-btn.active {
+    background: var(--color-primary);
+    border-color: transparent;
+    color: white;
+}
+.page-btn:disabled {
+    opacity: 0.4;
+    cursor: default;
+}
+.page-ellipsis {
+    color: var(--text-muted);
+    padding: 0 0.25rem;
+    font-size: 0.8rem;
+}
+.page-size-select {
+    padding: 0.35rem 0.5rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 0.8rem;
+    outline: none;
+    cursor: pointer;
+}
+.page-size-select option {
+    background: var(--color-surface);
+    color: var(--color-text);
+}
+.pagination-info {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+}
+.loading-row td, .empty-row td {
+    text-align: center;
+    padding: 3rem !important;
+    color: var(--text-muted);
+}
+.error-row td {
+    text-align: center;
+    padding: 2rem !important;
+    color: var(--color-hover);
+}
+.soil-row { cursor: pointer; }
+.soil-row:hover { background: color-mix(in srgb, var(--color-primary) 6%, transparent) !important; }
+.filter-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+.filter-left {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.filter-right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}

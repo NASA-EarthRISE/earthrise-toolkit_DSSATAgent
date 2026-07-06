@@ -1,0 +1,1 @@
+[{{ agent_name }}] New registration request from {{ user.get_full_name|default:user.username }}

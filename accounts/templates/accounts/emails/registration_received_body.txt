@@ -1,0 +1,16 @@
+A new user has requested access to {{ agent_name }}.
+
+Name:            {{ user.get_full_name|default:"—" }}
+Username:        {{ user.username }}
+Email:           {{ user.email }}
+Organization:    {{ reg.organization|default:"—" }}
+
+Reason for access:
+{{ reg.reason|default:"(not provided)" }}
+
+Requested roles: {% if reg.requested_roles %}{{ reg.requested_roles|join:", " }}{% else %}(none){% endif %}
+
+Review this request and approve or reject here:
+{{ review_url }}
+
+— {{ agent_name }}

@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: earthrise-agent-ingress
+  # TEMPLATE — copy to ingress.local.yaml (gitignored) with your real
+  # namespace/host and apply that. See README.md.
+  namespace: REPLACE_WITH_YOUR_NAMESPACE
+spec:
+  ingressClassName: haproxy
+  rules:
+  - host: REPLACE_WITH_YOUR_HOST
+    http:
+      paths:
+      - path: /earthrise/
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: earthrise-agent-service
+            port:
+              number: 80
+  tls:
+  - hosts:
+    - REPLACE_WITH_YOUR_HOST

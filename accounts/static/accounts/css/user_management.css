@@ -1,0 +1,25 @@
+/* Role-edit modal overlay. Default hidden state lives here; the JS
+ * toggles element.style.display between 'flex' and 'none' to show/hide,
+ * which overrides this default. */
+.role-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+}
+.role-modal-card {
+    max-width: 400px;
+    width: 90%;
+    margin: auto;
+    margin-top: 15vh;
+}
+.role-checkboxes {
+    margin-bottom: 1rem;
+}
+.role-modal-actions {
+    display: flex;
+    gap: 0.5rem;
+}

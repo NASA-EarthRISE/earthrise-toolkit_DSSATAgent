@@ -1,0 +1,13 @@
+Hi {{ user.get_full_name|default:user.username }},
+
+Good news — your {{ agent_name }} account has been approved and activated.
+
+You can now sign in using the username "{{ user.username }}" at:
+{{ login_url }}
+{% if approved_roles %}
+Roles granted:
+{% for role in approved_roles %}  - {{ role }}
+{% endfor %}{% endif %}
+If you have questions, just reply to this email.
+
+— {{ agent_name }}

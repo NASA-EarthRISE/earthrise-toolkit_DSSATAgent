@@ -1,0 +1,39 @@
+.pre-scroll-300 {
+    max-height: 300px;
+    overflow: auto;
+}
+.pre-scroll-200 {
+    max-height: 200px;
+    overflow: auto;
+    margin-top: 4px;
+}
+.pre-scroll-500 {
+    max-height: 500px;
+    overflow: auto;
+}
+.result-card {
+    margin-bottom: 20px;
+}
+.fw-normal {
+    font-weight: normal;
+}
+.mb-12 {
+    margin-bottom: 12px;
+}
+.summary-kv {
+    margin-right: 12px;
+    display: inline-block;
+}
+.overview-summary {
+    cursor: pointer;
+    font-weight: 500;
+}
+.files-heading {
+    margin: 12px 0 6px;
+}
+.mt-8 {
+    margin-top: 8px;
+}
+.modal-wide {
+    max-width: 900px;
+}

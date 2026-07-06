@@ -1,0 +1,44 @@
+{% extends "shell/base.html" %}
+{% block title %}{{ treatment.name }} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/treatment_detail.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="treatments" active_agent="dssat_agent" %}
+
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:explorer_treatments' %}" class="breadcrumb">&larr; All Treatments</a>
+            <h1 id="treatment-name">{{ treatment.name }}</h1>
+            <p class="subtitle">
+                <span class="mono">{{ treatment.crop_code }}</span>
+                {% if treatment.cultivar_code %}/ <span class="mono">{{ treatment.cultivar_code }}</span>{% endif %}
+                {% if treatment.dssat_model %}&middot; <span class="mono">{{ treatment.dssat_model }}</span>{% endif %}
+            </p>
+        </div>
+        <div class="explorer-actions">
+            <button class="btn btn-secondary" id="btn-rename">Rename</button>
+            <button class="btn btn-danger" id="btn-delete">Delete</button>
+        </div>
+    </div>
+
+    {% if treatment.description %}
+    <div class="detail-card">
+        <h3>Notes</h3>
+        <p>{{ treatment.description|linebreaksbr }}</p>
+    </div>
+    {% endif %}
+
+    <div id="sections"></div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    {{ treatment.id|json_script:"treatment-id" }}
+    <script type="application/json" id="treatment-data">{{ treatment_json|safe }}</script>
+    <script src="{% static 'dssat_agent/js/treatment_detail.js' %}"></script>
+{% endblock %}

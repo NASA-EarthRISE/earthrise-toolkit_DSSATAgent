@@ -1,0 +1,11 @@
+{% extends "earthrise_agents_base/_home_page.html" %}
+{% comment %}
+DSSAT home page branding override.
+
+Shadows earthrise_agents_base/templates/earthrise_agents_base/home.html
+because dssat_chat_agent is listed BEFORE earthrise_agents_base in
+INSTALLED_APPS. Extends the same private _home_page.html skeleton and
+fills the branding blocks with DSSAT-specific content.
+{% endcomment %}
+
+{% block home_logo %}🌾{% endblock %}

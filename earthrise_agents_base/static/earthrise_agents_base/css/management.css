@@ -1,0 +1,324 @@
+/* Management pages — profile, user management, config */
+
+.mgmt-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2rem;
+}
+
+.mgmt-header {
+    margin-bottom: 2rem;
+}
+
+.mgmt-header h1 {
+    font-family: var(--font-heading);
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 0.25rem;
+}
+
+.mgmt-header .subtitle {
+    color: var(--color-text-meta);
+    font-size: 0.95rem;
+}
+
+/* Card sections */
+.mgmt-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-card);
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.mgmt-card h2 {
+    font-family: var(--font-heading);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+/* Form elements */
+.mgmt-form .form-group {
+    margin-bottom: 1rem;
+}
+
+.mgmt-form label {
+    display: block;
+    font-size: 11px;
+    color: var(--color-text-meta);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 0.3rem;
+}
+
+.mgmt-form input[type="text"],
+.mgmt-form input[type="email"],
+.mgmt-form input[type="password"],
+.mgmt-form input[type="number"],
+.mgmt-form input[type="date"],
+.mgmt-form input[type="time"],
+.mgmt-form input[type="datetime-local"],
+.mgmt-form input[type="search"],
+.mgmt-form input[type="url"],
+.mgmt-form input[type="tel"],
+.mgmt-form textarea,
+.mgmt-form select {
+    width: 100%;
+    padding: 0.6rem 0.8rem;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    color: var(--color-text);
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    /* Light color-scheme so native controls (date pickers, number
+       spinners) render to match the Horizon light theme. */
+    color-scheme: light;
+}
+
+.mgmt-form input:focus,
+.mgmt-form textarea:focus,
+.mgmt-form select:focus {
+    background: var(--color-surface);
+    border-color: var(--color-focus);
+    outline: 1px dotted var(--color-focus);
+    box-shadow: none;
+}
+
+/* Keep number spinners subtle */
+.mgmt-form input[type="number"]::-webkit-inner-spin-button,
+.mgmt-form input[type="number"]::-webkit-outer-spin-button {
+    opacity: 0.6;
+}
+
+/* Date picker indicator (Chrome/Edge) on light theme */
+.mgmt-form input[type="date"]::-webkit-calendar-picker-indicator,
+.mgmt-form input[type="time"]::-webkit-calendar-picker-indicator,
+.mgmt-form input[type="datetime-local"]::-webkit-calendar-picker-indicator {
+    cursor: pointer;
+}
+
+.mgmt-form .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+    .mgmt-form .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.mgmt-form .btn-primary {
+    padding: 0.7rem 1.5rem;
+    background: var(--color-primary);
+    border: none;
+    border-radius: var(--radius);
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+
+.mgmt-form .btn-primary:hover {
+    background: var(--color-hover);
+}
+
+/* Role tags */
+.role-tags {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-top: 0.25rem;
+}
+
+.role-tag {
+    padding: 0.2rem 0.6rem;
+    background: color-mix(in srgb, var(--color-primary) 12%, transparent);
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+    color: var(--color-primary);
+}
+/* Superuser role gets a distinct (warm) accent so it stands out from
+ * the regular blue permission groups — makes admins easy to spot. */
+.role-tag.role-tag-superuser {
+    background: rgba(245, 158, 11, 0.15);
+    color: #b45309;
+    font-weight: 600;
+}
+
+/* Data table */
+.mgmt-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.mgmt-table th {
+    text-align: left;
+    font-size: 0.75rem;
+    color: var(--color-text-meta);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mgmt-table td {
+    padding: 0.7rem 0.8rem;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.85rem;
+}
+
+.mgmt-table tr:hover td {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* Status pills */
+.status-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 0.25rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.status-pending {
+    background: rgba(234, 179, 8, 0.15);
+    color: #a16207;
+}
+
+.status-active {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--color-success);
+}
+
+.status-inactive {
+    background: color-mix(in srgb, var(--color-hover) 12%, transparent);
+    color: var(--color-hover);
+}
+
+/* Action buttons */
+.btn-sm {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    background: var(--color-surface);
+    color: var(--color-text);
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+}
+
+.btn-sm:hover {
+    background: rgba(0, 0, 0, 0.04);
+}
+
+.btn-sm.btn-approve {
+    border-color: rgba(34, 197, 94, 0.5);
+    color: var(--color-success);
+}
+
+.btn-sm.btn-approve:hover {
+    background: rgba(34, 197, 94, 0.12);
+}
+
+.btn-sm.btn-reject {
+    border-color: color-mix(in srgb, var(--color-hover) 50%, transparent);
+    color: var(--color-hover);
+}
+
+.btn-sm.btn-reject:hover {
+    background: color-mix(in srgb, var(--color-hover) 10%, transparent);
+}
+
+/* Tabs */
+.mgmt-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.mgmt-tab {
+    padding: 0.6rem 1.25rem;
+    background: none;
+    border: none;
+    color: var(--color-text-meta);
+    cursor: pointer;
+    font-size: 0.9rem;
+    border-bottom: 2px solid transparent;
+    transition: color 0.2s, border-color 0.2s;
+}
+
+.mgmt-tab:hover {
+    color: var(--color-text);
+}
+
+.mgmt-tab.active {
+    color: var(--color-primary);
+    border-bottom-color: var(--color-primary);
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+/* Empty state */
+.mgmt-empty {
+    text-align: center;
+    padding: 2rem;
+    color: var(--color-text-meta);
+}
+
+/* ===================================
+   Inline style="" replacements
+   Relocated verbatim from element style="" attributes in the accounts
+   templates (password_change, password_change_done, profile).
+   ================================== */
+
+/* Form error summary banner (password_change). display:block is preserved
+   from the inline style so the server-rendered error block stays visible. */
+.form-error-summary {
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.form-error-list {
+    margin-top: 0.4rem;
+    margin-left: 1.2rem;
+}
+
+/* Right-aligned form button row */
+.mgmt-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+/* Left-aligned button row (password_change_done) */
+.mgmt-btn-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.mgmt-success-text {
+    margin-bottom: 1rem;
+}
+
+/* Small note paragraph (profile change-password card) */
+.mgmt-note {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}

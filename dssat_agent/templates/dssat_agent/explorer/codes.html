@@ -1,0 +1,57 @@
+{% extends "shell/base.html" %}
+{% block title %}{% if category %}{{ category|title }} Codes{% else %}DSSAT Codes{% endif %} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% if category %}
+{# Detail view: flex layout that fits the viewport #}
+<div class="codes-detail-layout">
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="codes" active_agent="dssat_agent" %}
+<div class="codes-detail-header">
+    <a href="{% url 'dssat_agent:explorer_codes' %}" class="breadcrumb">&larr; All Categories</a>
+    <h1>{{ category|title }} Codes</h1>
+</div>
+
+{% if codes.codes %}
+<div class="codes-scroll-area">
+    <div class="codes-flow">
+        {% for item in codes.codes %}
+        <div class="code-entry">
+            <span class="code-entry-code">{{ item.code }}</span>
+            <span class="code-entry-desc">{{ item.description|default:"—" }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<div class="empty-state">
+    <p>No codes found for "{{ category }}".</p>
+</div>
+{% endif %}
+</div>
+
+{% else %}
+{# Category list: normal scrollable page #}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="codes" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <h1>DSSAT Reference Codes</h1>
+        <p class="subtitle">Browse DSSAT parameter codes and reference values</p>
+    </div>
+
+    <div class="card-grid">
+        {% for cat in categories %}
+        <a href="{% url 'dssat_agent:codes_detail' category=cat.key %}" class="crop-card">
+            <div class="crop-code">
+                {% if cat.key == 'crop' %}🌾{% elif cat.key == 'soil' %}🏔{% elif cat.key == 'fertilizer' %}🧪{% elif cat.key == 'application' %}📋{% elif cat.key == 'planting' %}🌱{% elif cat.key == 'irrigation' %}💧{% elif cat.key == 'tillage' %}🚜{% elif cat.key == 'chemical' %}🧫{% elif cat.key == 'residue' %}🌿{% elif cat.key == 'drainage' %}🌊{% else %}📋{% endif %}
+            </div>
+            <div class="crop-name">{{ cat.label }}</div>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}

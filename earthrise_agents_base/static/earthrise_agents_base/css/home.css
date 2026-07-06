@@ -1,0 +1,226 @@
+.home-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+.home-card {
+    max-width: 900px;
+    width: 100%;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 3rem;
+    box-shadow: var(--shadow-card);
+}
+.home-logo { font-size: 5rem; text-align: center; margin-bottom: 1rem; }
+.home-title {
+    font-size: 2.5rem; font-weight: 700; text-align: center; margin-bottom: 0.5rem;
+    color: var(--color-primary);
+}
+.home-subtitle { font-size: 1.2rem; color: var(--text-secondary); text-align: center; margin-bottom: 2.5rem; }
+
+/* Featured-card container — a single centered card; additional cards
+ * render in the gallery rows below. */
+.entry-cards {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.entry-cards .entry-card {
+    max-width: 420px;
+    width: 100%;
+}
+.entry-card {
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.2s ease;
+}
+.entry-card:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: var(--color-primary);
+}
+.entry-card-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+.entry-card-title { font-weight: 700; font-size: 1.05rem; color: var(--text-primary); margin-bottom: 0.25rem; }
+.entry-card-badge {
+    display: inline-block; padding: 0.15rem 0.5rem; border-radius: 0.25rem;
+    font-size: 0.65rem; font-weight: 600; margin-bottom: 0.5rem; width: fit-content;
+}
+.badge-recommended { background: rgba(22, 163, 74, 0.12); color: var(--color-success); }
+.badge-advanced { background: color-mix(in srgb, var(--color-action) 12%, transparent); color: var(--color-action); }
+.badge-research { background: color-mix(in srgb, var(--color-primary) 12%, transparent); color: var(--color-primary); }
+.entry-card-desc { font-size: 0.8rem; color: var(--text-muted); line-height: 1.4; margin-bottom: 1rem; flex: 1; }
+
+.entry-card-action {
+    width: 100%; padding: 0.75rem 1rem;
+    border: none; border-radius: 0.75rem; color: white;
+    font-size: 0.9rem; font-weight: 600; cursor: pointer;
+    transition: all 0.2s ease; text-align: center; text-decoration: none;
+    display: inline-block;
+}
+.entry-card-action:hover { transform: translateY(-2px); }
+
+/* Card button color variants — slug matches the `color` field in
+ * AppConfig.home_cards (primary | purple | teal | green). */
+.btn-primary {
+    background: var(--color-primary);
+    box-shadow: var(--shadow-card);
+}
+.btn-primary:hover { background: var(--color-hover); }
+.btn-purple {
+    background: var(--color-action);
+    box-shadow: var(--shadow-card);
+}
+.btn-purple:hover { background: var(--color-hover); }
+.btn-teal {
+    background: var(--color-primary);
+    box-shadow: var(--shadow-card);
+}
+.btn-teal:hover { background: var(--color-hover); }
+.btn-green {
+    background: #16a34a;
+    box-shadow: var(--shadow-card);
+}
+.btn-green:hover { background: var(--color-hover); }
+
+/* Strategy dropdown inside knowledge card */
+.strategy-inline { margin-bottom: 0.75rem; }
+.strategy-inline label { display: block; font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.3rem; }
+.strategy-select {
+    width: 100%; padding: 0.5rem 0.6rem; background: var(--color-bg);
+    border: 1px solid var(--color-border); border-radius: var(--radius); color: var(--color-text);
+    font-size: 0.8rem; cursor: pointer;
+}
+.strategy-select:focus { background: var(--color-surface); border-color: var(--color-focus); outline: 1px dotted var(--color-focus); box-shadow: none; }
+.strategy-select optgroup, .strategy-select option { background: var(--color-surface); color: var(--color-text); }
+
+/* Explorer links + recent chats (unchanged styles) */
+.divider {
+    display: flex; align-items: center; text-align: center; margin: 2rem 0;
+    color: var(--text-muted); font-size: 0.9rem;
+}
+.divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--glass-border); }
+.divider span { padding: 0 1rem; }
+.recent-chat-item {
+    display: flex; justify-content: space-between; align-items: center; padding: 1rem;
+    background: var(--color-surface); border: 1px solid var(--color-border);
+    border-radius: var(--radius); margin-bottom: 0.75rem; text-decoration: none;
+    color: var(--text-primary); transition: all 0.2s ease;
+}
+.recent-chat-item:hover { background: rgba(0, 0, 0, 0.03); border-color: var(--primary-color); transform: translateX(4px); }
+.recent-chat-info { flex: 1; min-width: 0; }
+.recent-chat-title { font-weight: 500; font-size: 0.95rem; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.recent-chat-date { font-size: 0.8rem; color: var(--text-muted); }
+.recent-chat-arrow { color: var(--text-muted); margin-left: 1rem; font-size: 1.2rem; }
+.recent-chat-agent-badge { display: inline-block; padding: 0.1rem 0.3rem; background: color-mix(in srgb, var(--color-primary) 12%, transparent); border-radius: 0.25rem; font-size: 0.65rem; color: var(--primary-color); margin-left: 0.5rem; }
+.no-chats { text-align: center; color: var(--text-muted); padding: 2rem; font-size: 0.9rem; }
+
+/* ─── Module gallery rows (one horizontally-scrollable row per agent) ─── */
+
+.home-module { margin: 1.5rem 0 0.5rem; }
+.home-module-title {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin: 0 0 0.6rem;
+    padding-left: 0.2rem;
+}
+
+/* Host element — OverlayScrollbars replaces the native scroll on this
+ * element with its own overlay; children get moved into an internal
+ * .os-viewport. The host keeps layout-adjacent styling (mask, margin)
+ * but the flex row layout itself must go on the viewport (see below),
+ * otherwise the cards stack vertically. */
+.home-card-row {
+    position: relative;
+    margin: 0.3rem 0 0.2rem;
+    mask-image: linear-gradient(
+        to right,
+        black calc(100% - 3rem),
+        transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+        to right,
+        black calc(100% - 3rem),
+        transparent 100%
+    );
+}
+/* Drop the fade when content doesn't overflow — toggled via JS
+ * (based on OverlayScrollbars' state().hasOverflow.x) by setting
+ * data-overflows on the row. */
+.home-card-row[data-overflows="false"] {
+    mask-image: none;
+    -webkit-mask-image: none;
+}
+/* The OverlayScrollbars viewport is where the actual horizontal
+ * scrolling happens — so this is where the flex row, gap, padding,
+ * and scroll-snap need to live. Targets both the data-attribute and
+ * class selector OS uses, in case one emits but not the other. */
+.home-card-row [data-overlayscrollbars-viewport],
+.home-card-row .os-viewport {
+    display: flex;
+    gap: 1rem;
+    padding: 0.3rem 0.3rem 0.8rem;
+    scroll-snap-type: x proximity;
+}
+/* Fallback: if OverlayScrollbars didn't initialize (JS disabled or
+ * library failed to load), the host element still scrolls natively
+ * and the children need flex layout on the host itself. */
+.home-card-row:not(.os-host) {
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding: 0.3rem 0.3rem 0.8rem;
+    scroll-snap-type: x proximity;
+}
+
+/* Gallery-style card (compact, fixed width — smaller than .entry-card) */
+.home-gallery-card {
+    flex: 0 0 240px;
+    min-width: 240px;
+    max-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 1.1rem 1.15rem;
+    background: var(--color-surface);
+    border: 2px solid var(--color-border);
+    border-left-width: 4px;
+    border-radius: var(--radius);
+    color: inherit;
+    text-decoration: none;
+    transition: all 0.18s ease;
+    scroll-snap-align: start;
+}
+.home-gallery-card:hover {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: var(--primary-color);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-card);
+}
+.home-gallery-card .icon { font-size: 1.75rem; }
+.home-gallery-card .title {
+    font-weight: 700;
+    font-size: 0.98rem;
+    color: var(--text-primary);
+}
+.home-gallery-card .desc {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+    flex: 1;
+}
+/* Left-border accent per color variant — matches the button colors
+ * used elsewhere on the home page. */
+.home-gallery-card.accent-primary { border-left-color: var(--color-primary); }
+.home-gallery-card.accent-purple  { border-left-color: var(--color-action); }
+.home-gallery-card.accent-teal    { border-left-color: var(--color-primary); }
+.home-gallery-card.accent-green   { border-left-color: #16a34a; }

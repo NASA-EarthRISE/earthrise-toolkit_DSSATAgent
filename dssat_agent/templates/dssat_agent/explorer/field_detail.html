@@ -1,0 +1,68 @@
+{% extends "shell/base.html" %}
+{% block title %}{{ field.name }} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="fields" active_agent="dssat_agent" %}
+
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:explorer_fields' %}" class="breadcrumb">&larr; All Fields</a>
+            <h1 id="field-name">{{ field.name }}</h1>
+            {% if field.location_label %}
+            <p class="subtitle">{{ field.location_label }}</p>
+            {% endif %}
+        </div>
+        <div class="explorer-actions">
+            <button class="btn btn-secondary" id="btn-edit">Edit</button>
+            <button class="btn btn-danger" id="btn-delete">Delete</button>
+        </div>
+    </div>
+
+    <div class="detail-grid">
+        <div class="detail-card">
+            <h3>Location</h3>
+            <dl class="detail-list">
+                <dt>Latitude</dt><dd id="d-lat" class="mono">{{ field.latitude }}</dd>
+                <dt>Longitude</dt><dd id="d-lon" class="mono">{{ field.longitude }}</dd>
+                <dt>Elevation</dt>
+                <dd id="d-elev">{% if field.elevation is not None %}{{ field.elevation }} m{% else %}--{% endif %}</dd>
+                <dt>Admin centroid</dt>
+                <dd>{% if field.is_admin_centroid %}{{ field.admin_unit|default:"yes" }}{% else %}no{% endif %}</dd>
+            </dl>
+        </div>
+        <div class="detail-card">
+            <h3>Bindings</h3>
+            <dl class="detail-list">
+                <dt>Soil profile</dt>
+                <dd>
+                    {% if field.soil_profile %}
+                    <a href="{% url 'dssat_agent:soil_detail' soil_id=field.soil_profile.soil_id %}">
+                        {{ field.soil_profile.soil_id }}
+                    </a>
+                    {% elif field.inline_soil %}
+                    <em>inline soil ({{ field.inline_soil|length }} keys)</em>
+                    {% else %}--{% endif %}
+                </dd>
+                <dt>Weather source</dt><dd class="mono">{{ field.weather_source }}</dd>
+            </dl>
+        </div>
+    </div>
+
+    {% if field.description %}
+    <div class="detail-card detail-card-spaced">
+        <h3>Notes</h3>
+        <p>{{ field.description|linebreaksbr }}</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    {{ field.id|json_script:"field-id" }}
+    <script src="{% static 'dssat_agent/js/field_detail.js' %}"></script>
+{% endblock %}

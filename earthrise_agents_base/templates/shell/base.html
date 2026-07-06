@@ -1,0 +1,17 @@
+{% extends "shell/_base_skeleton.html" %}
+{% comment %}
+Default shell entry point.
+
+Sub-agents and pages extend "shell/base.html". By default this
+resolves to the framework's unbranded skeleton (via the extend above).
+
+A product app that wants to override branding ships its own
+templates/shell/base.html and lists itself BEFORE earthrise_agents_base
+in INSTALLED_APPS. That override wins template resolution and can
+inject branding blocks while itself extending shell/_base_skeleton.html
+so it inherits the actual skeleton markup (no code duplication).
+
+The skeleton is at a marked-private path (`_base_skeleton.html`) so
+overrides never accidentally extend `shell/base.html` and cause
+infinite recursion.
+{% endcomment %}

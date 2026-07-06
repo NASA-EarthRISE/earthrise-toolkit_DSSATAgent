@@ -1,0 +1,134 @@
+{% extends "shell/base.html" %}
+{% block title %}{{ crop_code }} Cultivars - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/cultivars_crop.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="crops" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:explorer_crops' %}" class="breadcrumb">&larr; All Crops</a>
+            <h1 id="crop-title">{{ crop_code }}</h1>
+            <span class="subtitle mono">{{ crop_code }}{% if dssat_model %} / {{ dssat_model }}{% endif %}</span>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'dssat_agent:crop_cultivar_create' crop_code=crop_code %}?dssat_model={{ dssat_model }}" class="btn btn-primary" id="create-btn">Create Custom Cultivar</a>
+        </div>
+    </div>
+
+    <div class="view-toggle">
+        <div class="toggle-slider" id="toggle-slider" data-pos="0"></div>
+        <button class="toggle-btn active" data-view="cultivars" id="btn-cultivars">Cultivars</button>
+        <button class="toggle-btn" data-view="ecotypes" id="btn-ecotypes">Ecotypes</button>
+        <button class="toggle-btn" data-view="crop-details" id="btn-crop-details">Crop Details</button>
+    </div>
+
+    <div class="filter-controls">
+        <form class="filter-left" id="filter-form">
+            {% comment %}
+                Filter applies on-type (debounced 200ms) — no Filter submit
+                button needed. Placeholder is updated by JS to match the
+                active view (Cultivars or Ecotypes).
+            {% endcomment %}
+            <input type="text" placeholder="Search cultivars..." class="filter-input" id="filter-search">
+            <a href="#" class="btn btn-ghost is-hidden" id="clear-filters">Clear</a>
+        </form>
+        <div class="filter-right">
+            <div>
+                <label class="pagination-info" for="page-size">Show:</label>
+                <select class="page-size-select" id="page-size">
+                    <option value="10">10</option>
+                    <option value="25" selected>25</option>
+                    <option value="50">50</option>
+                    <option value="100">100</option>
+                </select>
+            </div>
+            <div class="result-count" id="result-count">Loading...</div>
+        </div>
+    </div>
+
+    <div class="data-table-wrapper">
+        <table class="data-table">
+            <thead id="table-head">
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Ecotype</th>
+                    <th>Source</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="cv-tbody">
+                <tr class="loading-row"><td colspan="5">Loading cultivars...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination-bar is-hidden" id="pagination-bar">
+        <div class="pagination-info" id="pagination-info"></div>
+        <div class="page-numbers" id="page-numbers"></div>
+    </div>
+
+    {% comment %}
+        Crop Details panel — hidden until the user clicks the toggle.
+        Populated asynchronously by JS from
+        /dssat/api/crop-model/<crop>/?dssat_model=..
+    {% endcomment %}
+    <div id="view-crop-details" class="crop-details-panel" hidden>
+        <div class="detail-card">
+            <h3>Identity</h3>
+            <div class="detail-row"><span class="label">Crop code</span><span class="value mono" data-cd-field="crop_code">{{ crop_code }}</span></div>
+            <div class="detail-row"><span class="label">Display name</span><span class="value" data-cd-field="display_name">—</span></div>
+            <div class="detail-row"><span class="label">Crop group</span><span class="value" data-cd-field="crop_group">—</span></div>
+            <div class="detail-row"><span class="label">DSSAT model</span><span class="value mono" data-cd-field="dssat_model">{{ dssat_model|default:"—" }}</span></div>
+            <div class="detail-row"><span class="label">Default cultivar</span><span class="value mono" data-cd-field="default_cultivar_code">—</span></div>
+        </div>
+
+        <div class="detail-card">
+            <h3>Validation ranges</h3>
+            <div class="detail-row"><span class="label">Plant population</span><span class="value" data-cd-range="plant_population_range">—</span></div>
+            <div class="detail-row"><span class="label">Row spacing</span><span class="value" data-cd-range="row_spacing_range">—</span></div>
+            <div class="detail-row"><span class="label">Planting depth</span><span class="value" data-cd-range="planting_depth_range">—</span></div>
+        </div>
+
+        <div class="detail-card">
+            <h3>Supported harvest modes</h3>
+            <ul class="chip-list" data-cd-list="supported_harvs_modes">
+                <li class="empty-hint">—</li>
+            </ul>
+        </div>
+
+        <div class="detail-card">
+            <h3>Supported management practices</h3>
+            <ul class="chip-list" data-cd-list="supported_management">
+                <li class="empty-hint">—</li>
+            </ul>
+        </div>
+
+        <div class="detail-card wide">
+            <h3>Harvest stages</h3>
+            <div data-cd-stages-wrap>
+                <span class="empty-hint">Loading…</span>
+            </div>
+        </div>
+
+        <div class="detail-card wide" data-cd-notes-wrap hidden>
+            <h3>Notes</h3>
+            <div data-cd-notes class="cd-notes"></div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    <div id="cvc-config"
+         data-crop-code="{{ crop_code }}"
+         data-dssat-model="{{ dssat_model }}"
+         hidden></div>
+    <script src="{% static 'dssat_agent/js/cultivars_crop.js' %}"></script>
+{% endblock %}

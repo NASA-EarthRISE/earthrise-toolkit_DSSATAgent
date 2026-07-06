@@ -1,0 +1,113 @@
+{% extends "shell/base.html" %}
+{% block title %}{% if crop_code %}{{ crop_name }} Cultivars{% else %}Crop Browser{% endif %} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/cultivars.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="crops" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    {% if crop_code %}
+    <!-- Cultivar list for a specific crop -->
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:explorer_crops' %}" class="breadcrumb">&larr; Crop Browser</a>
+            <h1>{{ crop_name }} Cultivars</h1>
+            <span class="subtitle mono">{{ crop_code }}</span>
+        </div>
+    </div>
+
+    {% if cultivars %}
+    <div class="data-table-wrapper">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Ecotype</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cv in cultivars %}
+                <tr>
+                    <td class="mono">{{ cv.code }}</td>
+                    <td>{{ cv.name|default:"—" }}</td>
+                    <td class="mono">{{ cv.ecotype|default:"—" }}</td>
+                    <td>
+                        <a href="{% url 'dssat_agent:crop_cultivar_detail' crop_code=crop_code cultivar_code=cv.code %}" class="btn btn-sm">Details</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <p>No cultivars found for {{ crop_name }}.</p>
+    </div>
+    {% endif %}
+
+    {% else %}
+    <!-- Crop grid, grouped by crop_group -->
+    <div class="explorer-header">
+        <h1>Crop Browser</h1>
+        <p class="subtitle">Browse cultivars across {{ crops|length }} supported crop models</p>
+    </div>
+
+    {% if crops %}
+    <div class="crop-filter-bar">
+        <input type="text" id="crop-search"
+               placeholder="Search by code or name…"
+               autocomplete="off">
+        <label for="crop-group-filter">Group:</label>
+        <select id="crop-group-filter">
+            <option value="">All groups</option>
+            {% for group in crop_group_labels %}
+            <option value="{{ group }}">{{ group|capfirst }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    {% for bucket in grouped_crops %}
+    <section class="crop-group-section" data-group="{{ bucket.group }}">
+        <div class="crop-group-heading">
+            {{ bucket.group|capfirst }}
+            <span class="count">{{ bucket.crops|length }} crop{{ bucket.crops|length|pluralize }}</span>
+        </div>
+        <div class="card-grid">
+            {% for crop in bucket.crops %}
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop.code %}?dssat_model={{ crop.dssat_model }}"
+               class="crop-card"
+               data-code="{{ crop.code }}"
+               data-name="{{ crop.name|lower }}"
+               data-group="{{ crop.crop_group }}">
+                <div class="crop-code mono">{{ crop.code }}</div>
+                <div class="crop-name">{{ crop.name }}</div>
+                {% if crop.cultivar_count %}
+                <div class="crop-count">{{ crop.cultivar_count }} cultivar{{ crop.cultivar_count|pluralize }}</div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+    {% endfor %}
+
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🌿</div>
+        <h3>Could not load crops</h3>
+        <p>The SimulationAgent may be unavailable. Please try again later.</p>
+    </div>
+    {% endif %}
+    {% endif %}
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    {% if not crop_code and crops %}
+    <script src="{% static 'dssat_agent/js/cultivars.js' %}"></script>
+    {% endif %}
+{% endblock %}

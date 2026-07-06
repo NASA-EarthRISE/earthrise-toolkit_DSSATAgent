@@ -1,0 +1,64 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/feedback.css' %}">
+
+<button type="button"
+        class="feedback-float-btn"
+        data-open-feedback
+        aria-label="Send feedback">
+    <span class="feedback-float-icon">💬</span>
+    <span class="feedback-float-label">Feedback</span>
+</button>
+
+<div class="feedback-modal-backdrop" data-feedback-modal hidden>
+    <div class="feedback-modal" role="dialog" aria-labelledby="feedback-modal-title">
+        <div class="feedback-modal-header">
+            <h2 id="feedback-modal-title">Send Feedback</h2>
+            <button type="button"
+                    class="feedback-modal-close"
+                    data-close-feedback
+                    aria-label="Close feedback modal">&times;</button>
+        </div>
+
+        <form class="feedback-modal-form" data-feedback-form>
+            <label class="feedback-field">
+                <span class="feedback-field-label">Category</span>
+                <select name="category" required>
+                    <option value="" disabled selected>Choose a category…</option>
+                    <option value="feature_suggestion">Feature Suggestion</option>
+                    <option value="usability_issue">Usability Issue</option>
+                    <option value="technical_issue">Technical Issue</option>
+                    <option value="general_feedback">General Feedback</option>
+                    <option value="praise">Praise</option>
+                    <option value="data_quality">Data Quality Concern</option>
+                </select>
+            </label>
+
+            <label class="feedback-field">
+                <span class="feedback-field-label">Tell us more</span>
+                <textarea name="content"
+                          rows="5"
+                          required
+                          placeholder="What's on your mind? Share details, steps, or suggestions."></textarea>
+            </label>
+
+            {% if not user.is_authenticated %}
+            <label class="feedback-field">
+                <span class="feedback-field-label">Email (optional)</span>
+                <input type="email"
+                       name="anonymous_email"
+                       placeholder="so we can follow up">
+            </label>
+            {% endif %}
+
+            <div class="feedback-modal-footer">
+                <span class="feedback-modal-status" data-feedback-status></span>
+                <div class="feedback-modal-actions">
+                    <button type="button" class="feedback-btn-ghost" data-close-feedback>Cancel</button>
+                    <button type="submit" class="feedback-btn-primary" data-feedback-submit>Send</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{% static 'earthrise_agents_base/js/feedback_widget.js' %}" defer></script>

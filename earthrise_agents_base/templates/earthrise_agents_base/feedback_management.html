@@ -1,0 +1,174 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Feedback - {{ agent_name }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/management.css' %}">
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/feedback.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{# Suppress the floating feedback widget on the admin review page itself. #}
+{% block sitewide_feedback %}{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="management" %}
+
+<div class="mgmt-container">
+    <div class="mgmt-header">
+        <h1>Feedback</h1>
+        <p class="subtitle">Review message ratings and platform feedback submissions</p>
+    </div>
+
+    <div class="mgmt-tabs">
+        <button class="mgmt-tab active" data-tab="messages">
+            Message Feedback{% if message_feedback_count %} ({{ message_feedback_count }}){% endif %}
+        </button>
+        <button class="mgmt-tab" data-tab="site">
+            Site Feedback{% if site_feedback_new_count %} ({{ site_feedback_new_count }} new){% endif %}
+        </button>
+    </div>
+
+    <div class="tab-panel active" id="tab-messages">
+        <div class="mgmt-card">
+            <div class="feedback-filter-bar">
+                <label>
+                    Rating:
+                    <select data-messages-filter-rating>
+                        <option value="all">All</option>
+                        <option value="up">Thumbs Up</option>
+                        <option value="down">Thumbs Down</option>
+                    </select>
+                </label>
+                <span class="feedback-filter-hint">
+                    Developer view — click "Open chat" to review context for intent/response analysis.
+                </span>
+            </div>
+            <div class="feedback-table-wrapper">
+                <table class="mgmt-table feedback-messages-table">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Rater</th>
+                            <th>Chat</th>
+                            <th>Rating</th>
+                            <th>User question</th>
+                            <th>Assistant response</th>
+                            <th>Comment</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody data-messages-tbody>
+                        <tr>
+                            <td colspan="8" class="mgmt-empty">Loading…</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="feedback-pagination">
+                <button type="button" data-messages-prev disabled>&laquo; Prev</button>
+                <span data-messages-page-info></span>
+                <button type="button" data-messages-next disabled>Next &raquo;</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-panel" id="tab-site">
+        <div class="mgmt-card">
+            <div class="feedback-filter-bar">
+                <label>
+                    Category:
+                    <select data-site-filter-category>
+                        <option value="all">All</option>
+                        {% for key, label in categories %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                <label>
+                    Status:
+                    <select data-site-filter-status>
+                        <option value="all">All</option>
+                        {% for key, label in statuses %}
+                        <option value="{{ key }}">{{ label }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+            </div>
+            <div class="feedback-table-wrapper">
+                <table class="mgmt-table feedback-site-table">
+                    <thead>
+                        <tr>
+                            <th>When</th>
+                            <th>Who</th>
+                            <th>Category</th>
+                            <th>Content</th>
+                            <th>Page</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for fb in site_feedback %}
+                        <tr data-site-row data-feedback-id="{{ fb.id }}"
+                            data-category="{{ fb.category }}"
+                            data-status="{{ fb.status }}">
+                            <td class="nowrap">{{ fb.created_at|date:"M j, Y H:i" }}</td>
+                            <td>
+                                {% if fb.user %}
+                                    {{ fb.user.get_full_name|default:fb.user.username }}
+                                {% elif fb.anonymous_email %}
+                                    <span class="muted">{{ fb.anonymous_email }}</span>
+                                {% else %}
+                                    <span class="muted">anonymous</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ fb.get_category_display }}</td>
+                            <td class="feedback-content-cell">{{ fb.content|linebreaksbr }}</td>
+                            <td>
+                                {% if fb.page_url %}
+                                <a href="{{ fb.page_url }}" target="_blank" rel="noopener">link</a>
+                                {% else %}
+                                <span class="muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <select data-site-status>
+                                    {% for key, label in statuses %}
+                                    <option value="{{ key }}" {% if key == fb.status %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </td>
+                            <td>
+                                <textarea data-site-notes
+                                          rows="2"
+                                          placeholder="Admin notes…">{{ fb.admin_notes }}</textarea>
+                                <button type="button" class="btn-sm" data-site-save>Save</button>
+                                <span class="feedback-row-status" data-site-row-status></span>
+                                {% if fb.reviewed_by %}
+                                <div class="feedback-reviewed-by">
+                                    last reviewed by {{ fb.reviewed_by.get_full_name|default:fb.reviewed_by.username }}
+                                    {% if fb.reviewed_at %} at {{ fb.reviewed_at|date:"M j, Y H:i" }}{% endif %}
+                                </div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="7" class="mgmt-empty">No site feedback yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'earthrise_agents_base/js/feedback_management.js' %}" defer></script>
+{% endblock %}

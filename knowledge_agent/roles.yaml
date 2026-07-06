@@ -1,0 +1,16 @@
+groups:
+  - name: knowledge_admin
+    display_name: Knowledge Admin
+    description: Can run ingestion pipelines, manage strategies, and configure knowledge agent
+    permissions:
+      - run_pipeline
+      - manage_strategy
+      - manage_config
+
+custom_permissions:
+  - codename: run_pipeline
+    name: Can run knowledge ingestion pipelines
+  - codename: manage_strategy
+    name: Can change active retrieval strategy
+  - codename: manage_config
+    name: Can manage Knowledge agent configuration

@@ -1,0 +1,45 @@
+<nav class="explorer-nav">
+    <a href="{% url 'earthrise_agents_base:home' %}" class="nav-brand">{{ agent_name }}</a>
+    <div class="nav-links">
+        <a href="{% url 'earthrise_agents_base:home' %}" class="{% if active_nav == 'home' %}active{% endif %}">Chat</a>
+        {% for agent in agents_nav %}
+        {% if agent.mode == 'embedded' and agent.nav_items %}
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-toggle {% if active_agent == agent.agent_label %}active{% endif %}">{{ agent.label }}</button>
+            <div class="nav-dropdown-menu">
+                {% for item in agent.nav_items %}
+                <a href="{{ item.url }}">{{ item.label }}</a>
+                {% endfor %}
+            </div>
+        </div>
+        {% elif agent.mode == 'remote' %}
+        <a href="{{ agent.remote_url }}" target="_blank" rel="noopener">{{ agent.label }} &#8599;</a>
+        {% endif %}
+        {% endfor %}
+
+        {% if user.is_authenticated and admin_menu_items %}
+        <div class="nav-dropdown">
+            <button class="nav-dropdown-toggle {% if active_nav == 'management' %}active{% endif %}">Management</button>
+            <div class="nav-dropdown-menu">
+                {% regroup admin_menu_items by agent_display as mgmt_sections %}
+                {% for section in mgmt_sections %}
+                    {% if not forloop.first %}<div class="nav-divider"></div>{% endif %}
+                    <div class="nav-section-label">{{ section.grouper }}</div>
+                    {% for item in section.list %}
+                    <a href="{{ item.url }}">{{ item.label }}</a>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if active_nav != 'home' %}
+        <button type="button"
+                class="nav-feedback-link"
+                data-open-feedback
+                aria-label="Send feedback">Send Feedback</button>
+        {% endif %}
+
+        {% include "earthrise_agents_base/partials/_user_menu.html" %}
+    </div>
+</nav>

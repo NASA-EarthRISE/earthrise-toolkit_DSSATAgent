@@ -1,0 +1,23 @@
+{% comment %}
+Reusable event-table placeholder.
+
+The JS widget (event_table.js) injects the table markup on initialization.
+Pages that include this partial must:
+
+1. Load the event_table CSS + JS once per page:
+     <link rel="stylesheet" href="{% static 'dssat_agent/css/event_table.css' %}">
+     <script src="{% static 'dssat_agent/js/event_table.js' %}"></script>
+
+2. Instantiate a widget for each container:
+     <script>
+         initEventTable(document.getElementById('fert-table'), {
+             eventType: 'fertilizer',
+             cropCode: 'MZ',
+             initialRows: [...]  // optional
+         });
+     </script>
+
+Template usage:
+    {% include "dssat_agent/partials/event_table.html" with widget_id="fert-table" %}
+{% endcomment %}
+<div class="event-table-widget-container" id="{{ widget_id }}"></div>

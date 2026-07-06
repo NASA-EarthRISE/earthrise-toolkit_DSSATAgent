@@ -1,0 +1,59 @@
+{% extends "shell/base.html" %}
+{% block title %}{% if edit_mode %}Edit{% else %}Create{% endif %} Ecotype - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/ecotype_form.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="crops" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop_code %}?dssat_model={{ dssat_model }}" class="breadcrumb">&larr; {{ crop_code }} Crop</a>
+            <h1 id="page-title">{% if edit_mode %}Edit{% else %}Create{% endif %} Ecotype</h1>
+            <span class="subtitle mono">{{ crop_code }} / {{ dssat_model }}</span>
+        </div>
+    </div>
+
+    <form id="ecotype-form" class="create-form">
+        {% csrf_token %}
+
+        <h3 class="section-title">Ecotype Identity</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="ecotype_code">Ecotype Code (max 6 chars)</label>
+                <input type="text" id="ecotype_code" name="ecotype_code" maxlength="6" required
+                       {% if edit_mode %}value="{{ ecotype_code }}"{% endif %}>
+                <small id="code-feedback" class="code-feedback"></small>
+            </div>
+            <div class="form-group">
+                <label for="ecotype_name">Ecotype Name</label>
+                <input type="text" id="ecotype_name" name="ecotype_name" maxlength="64">
+            </div>
+        </div>
+
+        <h3 class="section-title">Ecotype Parameters</h3>
+        <div class="form-grid" id="eco-params-grid">
+            <p class="form-loading-hint">Loading schema...</p>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="save-btn" disabled>Save Ecotype</button>
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop_code %}?dssat_model={{ dssat_model }}" class="btn btn-ghost">Cancel</a>
+        </div>
+    </form>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    <div id="ef-config"
+         data-crop-code="{{ crop_code }}"
+         data-dssat-model="{{ dssat_model }}"
+         data-edit-mode="{{ edit_mode|yesno:'true,false' }}"
+         data-ecotype-id="{{ ecotype_id|default:'' }}"
+         hidden></div>
+    <script src="{% static 'dssat_agent/js/ecotype_form.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,1 @@
+Your {{ agent_name }} account is approved

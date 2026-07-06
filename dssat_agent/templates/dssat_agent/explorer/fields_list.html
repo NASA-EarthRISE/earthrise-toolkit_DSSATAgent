@@ -1,0 +1,34 @@
+{% extends "shell/base.html" %}
+{% block title %}Fields - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="fields" active_agent="dssat_agent" %}
+
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <h1>Field Library</h1>
+            <p class="subtitle">
+                Re-usable named locations bound to a soil profile and weather source.
+                The wizard saves a Field per location when you submit; pick from this
+                library to skip re-entering coordinates.
+            </p>
+        </div>
+        <div class="explorer-actions">
+            <input type="search" id="fields-q" class="form-input" placeholder="Search by name or location...">
+        </div>
+    </div>
+
+    <div id="fields-table-wrap">
+        <div class="empty-state small">Loading…</div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    <script src="{% static 'dssat_agent/js/fields_list.js' %}"></script>
+{% endblock %}

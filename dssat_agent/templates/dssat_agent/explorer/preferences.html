@@ -1,0 +1,45 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}DSSAT Preferences{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/management.css' %}">
+<link rel="stylesheet" href="{% static 'dssat_agent/css/event_table.css' %}">
+<link rel="stylesheet" href="{% static 'dssat_agent/css/config.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="user" %}
+
+<div class="mgmt-container">
+    <div class="mgmt-header">
+        <h1>{% if is_system %}DSSAT System Config{% else %}DSSAT Preferences{% endif %}</h1>
+        <p class="subtitle">
+            {% if is_system %}
+            System-wide DSSAT defaults. Users inherit these unless they override them in their personal preferences.
+            {% else %}
+            Your personal DSSAT simulation defaults. Any field you leave blank falls back to the system default.
+            {% endif %}
+        </p>
+    </div>
+
+    {% include "dssat_agent/partials/_config_tabs.html" %}
+</div>
+
+<script>
+    window.CONFIG_PAGE = {
+        isSystem: {{ is_system|yesno:"true,false" }},
+        scope: "{{ is_system|yesno:'system,user' }}",
+        availableCrops: {{ available_crops_json|safe }},
+        configuredCrops: {{ configured_crops_json|safe }},
+    };
+</script>
+<script src="{% static 'dssat_agent/js/event_table.js' %}"></script>
+<script src="{% static 'dssat_agent/js/crop_card.js' %}"></script>
+<script src="{% static 'dssat_agent/js/management_practices.js' %}"></script>
+<script src="{% static 'dssat_agent/js/config_preferences.js' %}"></script>
+{% endblock %}

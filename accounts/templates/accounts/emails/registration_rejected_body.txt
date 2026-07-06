@@ -1,0 +1,12 @@
+Hi{% if full_name %} {{ full_name }}{% endif %},
+
+Thank you for your interest in {{ agent_name }}. Unfortunately your
+registration request has not been approved at this time.
+{% if notes %}
+Reviewer notes:
+{{ notes }}
+{% endif %}
+If you believe this was a mistake or your circumstances change, you're
+welcome to submit a new request in the future.
+
+— {{ agent_name }}

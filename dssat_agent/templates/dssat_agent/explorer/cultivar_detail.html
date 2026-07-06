@@ -1,0 +1,70 @@
+{% extends "shell/base.html" %}
+{% block title %}Cultivar {{ cultivar_code }} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/cultivar_detail.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="crops" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop_code %}{% if dssat_model %}?dssat_model={{ dssat_model }}{% endif %}" class="breadcrumb">&larr; {{ crop_code }} Cultivars</a>
+            <h1>
+                {{ cultivar.crop_name|default:crop_code }} / {{ cultivar_code }}
+                {% if cultivar.source %}<span class="source-badge {{ cultivar.source }}">{{ cultivar.source }}</span>{% endif %}
+                {% if cultivar.validation_status %}<span class="validation-badge {{ cultivar.validation_status }}">{{ cultivar.validation_status }}</span>{% endif %}
+            </h1>
+            <span class="subtitle mono">{{ crop_code }} / {{ cultivar_code }}{% if cultivar.dssat_model %} / {{ cultivar.dssat_model }}{% endif %}</span>
+        </div>
+        <div class="header-actions">
+            <a href="{% url 'dssat_agent:crop_cultivar_create' crop_code=crop_code %}?dssat_model={{ dssat_model }}&clone={{ cultivar.id|default:'' }}" class="btn btn-primary">Clone &amp; Modify</a>
+            {% if cultivar.source == 'custom' or cultivar.source == 'cloned' %}
+            <a href="{% url 'dssat_agent:crop_cultivar_edit' crop_code=crop_code cultivar_id=cultivar.id %}?dssat_model={{ dssat_model }}" class="btn btn-ghost">Edit</a>
+            {% endif %}
+            <a href="{% url 'dssat_agent:crop_download_cul' crop_code=crop_code %}{% if dssat_model %}?dssat_model={{ dssat_model }}{% endif %}" class="btn btn-ghost">Download .CUL</a>
+            <a href="{% url 'dssat_agent:crop_download_eco' crop_code=crop_code %}{% if dssat_model %}?dssat_model={{ dssat_model }}{% endif %}" class="btn btn-ghost">Download .ECO</a>
+        </div>
+    </div>
+
+    {% if cultivar.cultivar_params %}
+    <div class="detail-grid">
+        <div class="detail-card wide">
+            <h3>Cultivar Parameters</h3>
+            <dl class="detail-list">
+                {% for key, value in cultivar.cultivar_params.items %}
+                <dt>{{ key }}</dt>
+                <dd>{{ value|default:"—" }}</dd>
+                {% endfor %}
+            </dl>
+        </div>
+
+        {% if cultivar.ecotype_params %}
+        <div class="detail-card wide">
+            <h3>Ecotype Parameters{% if cultivar.ecotype_code %} <span class="mono eco-code-hint">({{ cultivar.ecotype_code }})</span>{% endif %}</h3>
+            <dl class="detail-list">
+                {% for key, value in cultivar.ecotype_params.items %}
+                <dt>{{ key }}</dt>
+                <dd>{{ value|default:"—" }}</dd>
+                {% endfor %}
+            </dl>
+        </div>
+        {% endif %}
+    </div>
+
+    {% elif cultivar.error %}
+    <div class="empty-state">
+        <h3>Error</h3>
+        <p>{{ cultivar.error }}</p>
+    </div>
+
+    {% else %}
+    <div class="empty-state">
+        <h3>Cultivar not found</h3>
+        <p>Could not load details for cultivar {{ cultivar_code }}.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

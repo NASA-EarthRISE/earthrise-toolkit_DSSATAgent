@@ -1,0 +1,58 @@
+# DSSAT knowledge tenant configuration.
+#
+# Loaded at startup by dssat_chat_agent/apps.py::ready() via post_migrate.
+# Each entry becomes a KnowledgeTenant row in the knowledge_agent schema,
+# with domain-specific entity/relationship vocabularies driving GraphRAG
+# extraction, ontology building, and retrieval prompts.
+#
+# The `documents_dir` key points at the tenant's corpus root; each top-level
+# subdirectory under it is registered as one KnowledgeSource row for the tenant
+# (see dssat_chat_agent/apps.py::_register_knowledge_tenant). The path is resolved
+# relative to `dssat_chat_agent/data/` unless absolute, and is overridden by the
+# KNOWLEDGE_DOCUMENTS_DIR env var when set.
+
+tenants:
+  - tenant_id: dssat
+    display_name: DSSAT Chat Agent
+    default_strategy: hybrid
+    documents_dir: documents
+    domain:
+      hint: DSSAT crop modelling and agronomy
+      entity_types:
+        - Crop
+        - Cultivar
+        - CropModel
+        - SimulationParameter
+        - SoilProperty
+        - WeatherVariable
+        - GrowthStage
+        - ManagementPractice
+        - OutputVariable
+        - FileFormat
+        - Equation
+      relationship_types:
+        - requiresInput
+        - producesOutput
+        - affects
+        - partOf
+        - simulatedBy
+        - calibratedWith
+        - measuredIn
+        - belongsToModule
+      ontology:
+        namespace: http://dssat.net/ontology#
+        prefix: dssat
+        relationship_typing:
+          requiresInput:    [CropModel, SimulationParameter]
+          producesOutput:   [CropModel, OutputVariable]
+          affects:          [SimulationParameter, OutputVariable]
+          partOf:           [GrowthStage, CropModel]
+          simulatedBy:      [Crop, CropModel]
+          calibratedWith:   [Cultivar, SimulationParameter]
+          measuredIn:       [OutputVariable, OutputVariable]
+          belongsToModule:  [SimulationParameter, CropModel]
+        data_properties:
+          - hasDefaultValue
+          - hasRange
+          - hasUnit
+          - hasDescription

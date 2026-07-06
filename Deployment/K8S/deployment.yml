@@ -1,0 +1,186 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: earthrise-agent
+  labels:
+    k8s-app: earthrise-agent
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: earthrise-agent
+  template:
+    metadata: 
+      labels:
+        k8s-app: earthrise-agent
+    spec:
+      # TEMPLATE: pin scheduling to your cluster's GPU/storage nodes, or delete
+      # this whole `affinity` block to schedule anywhere. (Real node list lives
+      # in the gitignored deployment.local.yaml.)
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - REPLACE_WITH_YOUR_NODE_HOSTNAME
+      initContainers:
+      - name: repo-updater
+        image: REPLACE_WITH_YOUR_REGISTRY/dssat-agent:latest
+        command: [ "/bin/bash", "-c" ]
+        args: [ "mkdir -p /earthrise/app ; cp -rfT /app /earthrise/app ; chmod -R a+rX /earthrise/app" ]
+        envFrom:
+          - secretRef:
+              name: earthrise-agent-secrets
+        resources:
+          limits:
+            memory: 12Gi
+            cpu: "2"
+          requests:
+            memory: 8Gi
+            cpu: "2"
+        #Declare the volume to be used
+        volumeMounts:
+          - name: earthrise
+            mountPath: /earthrise
+          - name: ssh-secret
+            mountPath: /secrets/dssat_key.pem
+            subPath: dssat_key.pem
+      # Builds the Python venv on the PVC at /earthrise/venv. Skips the
+      # full pip install when requirements.txt hash matches the previous
+      # run (see scripts/build_venv.sh). Always reinstalls the local
+      # DSSATTools fork. Reuses the dssat-agent image (already cached on
+      # the node from repo-updater) so no extra pull is needed; the
+      # script apt-installs the -dev headers/toolchain on top at runtime.
+      - name: venv-builder
+        image: REPLACE_WITH_YOUR_REGISTRY/dssat-agent:latest
+        # build_venv.sh ships in the image at /usr/local/bin (see Dockerfile);
+        # it reads the synced source tree from /earthrise/app via $APP_DIR.
+        command: ["/usr/local/bin/build_venv.sh"]
+        env:
+          - name: APP_DIR
+            value: "/earthrise/app"
+          - name: VENV_DIR
+            value: "/earthrise/venv"
+        resources:
+          limits:
+            memory: 8Gi
+            cpu: "4"
+          requests:
+            memory: 4Gi
+            cpu: "2"
+        volumeMounts:
+          - name: earthrise
+            mountPath: /earthrise
+      containers:
+      - name: client
+        image: REPLACE_WITH_YOUR_REGISTRY/dssat-agent:latest
+        command: ["/bin/bash", "-c"]
+        args: ["sleep infinity"]
+        envFrom:
+        - secretRef:
+            name: earthrise-agent-secrets
+        resources:
+          limits:
+            memory: 12Gi
+            cpu: "2"
+          requests:
+            memory: 8Gi
+            cpu: "2"
+   #Declare the volume to be used
+        volumeMounts:
+        - name: earthrise
+          mountPath: /earthrise
+        - name: ssh-secret
+          mountPath: /secrets/dssat_key.pem
+          subPath: dssat_key.pem
+      - name: webapp
+        image: REPLACE_WITH_YOUR_REGISTRY/dssat-agent:latest
+        command: [ "/bin/bash", "-c" ]
+        args: [ "cd /earthrise/app; until python -c 'import socket; s=socket.socket(); s.connect((\"localhost\", 5432)); s.close()' 2>/dev/null; do echo 'Waiting for postgres...'; sleep 2; done; /entrypoint.sh uvicorn dssat_chat_project.asgi:application --host 0.0.0.0 --port 8000 --workers 4" ]
+        ports:
+          - containerPort:
+              8000
+        envFrom:
+          - secretRef:
+              name: earthrise-agent-secrets
+        resources:
+          limits:
+            memory: 12Gi
+            cpu: "4"
+          requests:
+            memory: 8Gi
+            cpu: "4"
+        #Declare the volume to be used
+        volumeMounts:
+          - name: earthrise
+            mountPath: /earthrise
+          - name: ssh-secret
+            mountPath: /secrets/dssat_key.pem
+            subPath: dssat_key.pem
+      - name: redis
+        image: redis:7-alpine
+        ports:
+          - containerPort: 6379
+        command: ["redis-server"]
+        resources:
+          limits:
+            memory: 2Gi
+            cpu: "1"
+          requests:
+            memory: 1Gi
+            cpu: "0.5"
+      - name: postgres
+        image: postgis/postgis:16-3.4
+        command: ["/bin/bash", "-c"]
+        args: ["apt-get update && apt-get install -y postgresql-16-pgvector && rm -rf /var/lib/apt/lists/* && docker-entrypoint.sh postgres"]
+        ports:
+          - containerPort: 5432
+        envFrom:
+          - secretRef:
+              name: earthrise-agent-secrets
+        resources:
+          limits:
+            memory: 4Gi
+            cpu: "4"
+          requests:
+            memory: 2Gi
+            cpu: "2"
+        volumeMounts:
+          - name: earthrise
+            mountPath: /var/lib/postgresql/data
+            subPath: pgdata
+      - name: celery
+        image: REPLACE_WITH_YOUR_REGISTRY/dssat-agent:latest
+        command: [ "/bin/bash", "-c" ]
+        args: [ "cd /earthrise/app; until python -c 'import socket; s=socket.socket(); s.connect((\"localhost\", 5432)); s.close()' 2>/dev/null; do echo 'Waiting for postgres...'; sleep 2; done; /entrypoint.sh celery -A dssat_chat_project worker --loglevel=info --concurrency=4 -Q dssat_chat_project,data_agent,dssat_agent,knowledge_agent --uid=nobody" ]
+        envFrom:
+          - secretRef:
+              name: earthrise-agent-secrets
+        resources:
+          limits:
+            memory: 12Gi
+            cpu: "4"
+          requests:
+            memory: 8Gi
+            cpu: "4"
+        #Declare the volume to be used
+        volumeMounts:
+          - name: earthrise
+            mountPath: /earthrise
+          - name: ssh-secret
+            mountPath: /secrets/dssat_key.pem
+            subPath: dssat_key.pem
+      volumes:
+      - name: earthrise
+        persistentVolumeClaim:
+          claimName: earthrise
+      - name: ssh-secret
+        secret:
+          secretName: earthrise-agent-tunnel-secrets
+
+
+
+      

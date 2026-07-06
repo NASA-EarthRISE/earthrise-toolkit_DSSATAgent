@@ -1,0 +1,27 @@
+{% extends "shell/_base_skeleton.html" %}
+{% load static %}
+
+{% comment %}
+   DSSAT branding override.
+
+   This file shadows earthrise_agents_base/templates/shell/base.html
+   in Django's template loader because dssat_chat_agent is listed
+   BEFORE earthrise_agents_base in INSTALLED_APPS. Every template in
+   the repo that extends "shell/base.html" (framework pages, chat pages,
+   sub-agent explorer pages) will therefore inherit this DSSAT-branded
+   variant when this product is deployed.
+
+   A different product shell (e.g. an "acme_chat_agent" app) would ship
+   its own templates/shell/base.html with different branding — the
+   framework and sub-agents never need to change.
+{% endcomment %}
+
+{% block product_css %}
+    <link rel="stylesheet" href="{% static 'dssat_chat_agent/css/dssat-tokens.css' %}">
+{% endblock %}
+
+{% block branding_footer %}
+    <footer class="product-branding-footer">
+        <span class="branding-line">Powered by DSSAT</span>
+    </footer>
+{% endblock %}

@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ agent_name }} - Chat</title>
+    {# Deployment subpath prefix ("/subpath" or "") — used by JS to build deployment-aware URLs. #}
+    <script>window.SUBPATH = "{{ subpath_prefix|default:'' }}";</script>
+    {% comment %}
+        Per-agent accent colors + icons (tool-trace rows), from each AppConfig
+        via the agent_visuals context processor.
+    {% endcomment %}
+    <script>window.AGENT_VISUALS = {{ agent_visuals_json|safe }};</script>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    {% comment %}
+        OverlayScrollbars — loaded here (same CDN as base.html) so the
+        messages wrapper gets the shared dark-theme scrollbar used by
+        the rest of the app.
+    {% endcomment %}
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es5.min.js" defer></script>
+
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/chat.css' %}?v=11">
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/feedback.css' %}">
+
+    {% comment %}
+        Product-shell hooks. This standalone chat document does NOT extend
+        shell/base.html, so a product fills these to brand the chat screen:
+        product_css (design-token overrides) and, optionally, head_globals for
+        page-level JS globals. Empty by default (generic build). Per-agent
+        tool-trace colors/icons come from AppConfig via window.AGENT_VISUALS
+        (injected above), not from a product hook.
+    {% endcomment %}
+    {% block head_globals %}{% endblock %}
+    {% block product_css %}{% endblock %}
+</head>
+<body class="chat-page">
+    {% include "earthrise_agents_base/partials/nav.html" with active_nav="chat" %}
+
+    <div class="app-container">
+        <aside class="sidebar collapsed" id="sidebar">
+            <div class="sidebar-top-action">
+                <button class="sidebar-toggle" id="menu-toggle" aria-label="Toggle chat history">
+                    <span class="toggle-when-closed" aria-hidden="true">☰</span>
+                    <span class="toggle-when-open">← Close menu</span>
+                </button>
+            </div>
+            <div class="sidebar-header">
+                <button class="new-chat-btn" id="new-chat-btn">New Chat</button>
+            </div>
+            <div class="conversations-list" id="conversations-list">
+                <div class="loading-overlay">
+                    <div class="loading-spinner"></div>
+                </div>
+            </div>
+        </aside>
+
+        <main class="chat-container">
+            <div class="chat-status-corner">
+                <span id="status-badge" class="status-badge {{ is_processing|yesno:'processing,ready' }}">
+                    <span class="status-dot"></span>
+                    <span>{{ is_processing|yesno:'Processing,Ready' }}</span>
+                </span>
+                <span class="chat-title-inline" id="chat-title">{{ chat.title|default:"Select a conversation" }}</span>
+            </div>
+
+            <div class="messages-wrapper" id="messages-wrapper">
+                {% if chat_id %}
+                <div class="messages-container" id="messages-container">
+                </div>
+                {% else %}
+                <div class="welcome-screen">
+                    <div class="welcome-logo">{% block welcome_logo %}💬{% endblock %}</div>
+                    <h1 class="welcome-title">{{ agent_name }}</h1>
+                    <p class="welcome-subtitle">{% block welcome_subtitle %}Your AI-powered assistant{% endblock %}</p>
+                    {% block welcome_features %}{% endblock %}
+                </div>
+                {% endif %}
+            </div>
+
+            <div class="input-area">
+                <div class="input-wrapper">
+                    {# Toggle-bar inner DOM is built and re-built by AgentToggleController #}
+                    {# so SPA chat-switches between locked and unlocked chats work without #}
+                    {# a full page reload. Empty on welcome screen (no chat_id). #}
+                    <div class="agent-toggle-bar" id="agent-toggle-bar" data-locked="false"></div>
+                    <form class="input-form" id="message-form">
+                        <textarea
+                            class="message-input"
+                            id="message-input"
+                            placeholder="{% block chat_placeholder %}Ask me anything...{% endblock %}"
+                            rows="1"
+                            {% if is_processing or not chat_id %}disabled{% endif %}></textarea>
+                        <button
+                            type="submit"
+                            class="send-button"
+                            id="send-button"
+                            {% if is_processing or not chat_id %}disabled{% endif %}>
+                            Send
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+
+        <aside class="chart-section" id="chart-section">
+            <div class="chart-header">
+                <h3>Chart Gallery</h3>
+                <button class="close-charts-btn" id="close-charts-btn">&times;</button>
+            </div>
+            {# GHOST-SCROLL: chart-gallery-frame + chart-gallery-ghost let us apply #}
+            {# OverlayScrollbars to a proxy element so the gallery's layout stays native. #}
+            <div class="chart-gallery-frame">
+                <div class="chart-gallery" id="chart-gallery">
+                </div>
+                <div class="chart-gallery-ghost" id="chart-gallery-ghost" aria-hidden="true">
+                    <div class="chart-gallery-ghost-inner" id="chart-gallery-ghost-inner"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script type="application/json" id="template-data">
+        {
+            "chatId": {% if chat_id %}"{{ chat_id }}"{% else %}null{% endif %},
+            "isProcessing": {{ is_processing|yesno:'true,false' }},
+            "messages": {{ messages|safe }},
+            "basePath": "{{ base_path }}",
+            "enabledAgents": {{ enabled_agents_json|default:'[]'|safe }},
+            "agentsLocked": {{ chat.agents_locked|yesno:'true,false' }},
+            "availableAgentLabels": {{ available_agent_labels_json|default:'[]'|safe }},
+            "availableAgentList": {{ available_agent_list_json|default:'[]'|safe }}
+        }
+    </script>
+
+    {% include "earthrise_agents_base/partials/feedback_widget.html" %}
+
+    <script src="{% static 'earthrise_agents_base/js/chat.js' %}?v=11"></script>
+</body>
+</html>

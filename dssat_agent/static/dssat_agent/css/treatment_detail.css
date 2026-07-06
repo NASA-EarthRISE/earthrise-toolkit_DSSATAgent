@@ -1,0 +1,18 @@
+.treatment-section {
+    margin-top: 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+}
+.treatment-section h4 {
+    margin: 0 0 0.4rem 0;
+    font-size: 0.92rem;
+    color: var(--text-secondary);
+}
+.treatment-section pre {
+    margin: 0;
+    font-size: 0.78rem;
+    overflow-x: auto;
+    color: var(--text-primary);
+}

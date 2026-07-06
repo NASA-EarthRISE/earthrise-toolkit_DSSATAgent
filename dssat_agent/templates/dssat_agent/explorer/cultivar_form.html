@@ -1,0 +1,77 @@
+{% extends "shell/base.html" %}
+{% block title %}{% if edit_mode %}Edit{% else %}Create{% endif %} Cultivar - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/cultivar_form.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="crops" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop_code %}?dssat_model={{ dssat_model }}" class="breadcrumb">&larr; {{ crop_code }} Cultivars</a>
+            <h1 id="page-title">{% if edit_mode %}Edit{% else %}Create{% endif %} Cultivar</h1>
+            <span class="subtitle mono">{{ crop_code }} / {{ dssat_model }}</span>
+        </div>
+    </div>
+
+    <form id="cultivar-form" class="create-form">
+        {% csrf_token %}
+
+        <!-- Identity fields -->
+        <h3 class="section-title">Cultivar Identity</h3>
+        <div class="form-grid">
+            <div class="form-group">
+                <label for="cultivar_code">Cultivar Code (max 6 chars)</label>
+                <input type="text" id="cultivar_code" name="cultivar_code" maxlength="6" required
+                       {% if edit_mode %}value="{{ cultivar_code }}"{% endif %}>
+                <small id="code-feedback" class="code-feedback"></small>
+            </div>
+            <div class="form-group">
+                <label for="cultivar_name">Cultivar Name</label>
+                <input type="text" id="cultivar_name" name="cultivar_name" maxlength="64">
+            </div>
+            <div class="form-group">
+                <label for="ecotype_select">Ecotype</label>
+                <select id="ecotype_select" name="ecotype_id">
+                    <option value="">-- Loading ecotypes --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Dynamic cultivar parameters (populated by JS) -->
+        <h3 class="section-title">Cultivar Parameters</h3>
+        <div class="form-grid" id="cul-params-grid">
+            <p class="form-loading-hint">Loading schema...</p>
+        </div>
+
+        <!-- Dynamic ecotype parameters (populated by JS, shown for clone-with-ecotype or custom ecotype) -->
+        <div id="eco-section" hidden>
+            <h3 class="section-title">Ecotype Parameters <span class="section-note">(editing cloned ecotype)</span></h3>
+            <div class="form-grid" id="eco-params-grid"></div>
+        </div>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" id="save-btn">Save Cultivar</button>
+            <button type="button" class="btn btn-ghost is-hidden" id="validate-btn">Validate with DSSAT</button>
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop_code %}?dssat_model={{ dssat_model }}" class="btn btn-ghost">Cancel</a>
+        </div>
+    </form>
+
+    <div class="validation-result" id="validation-result"></div>
+</div>
+
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    <div id="cf-config"
+         data-crop-code="{{ crop_code }}"
+         data-dssat-model="{{ dssat_model }}"
+         data-edit-mode="{{ edit_mode|yesno:'true,false' }}"
+         data-cultivar-id="{{ cultivar_id|default:'' }}"
+         data-clone-source-id="{{ clone_source_id|default:'' }}"
+         hidden></div>
+    <script src="{% static 'dssat_agent/js/cultivar_form.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,187 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge — Strategies{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/knowledge.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="strategies" active_agent="knowledge_agent" %}
+
+<div class="explorer-container">
+    <!-- Header -->
+    <div class="explorer-header">
+        <div>
+            <h1>Retrieval Strategies</h1>
+            <p class="subtitle">
+                Manage ingestion pipelines and choose the active retrieval strategy.
+            </p>
+        </div>
+        {% if perms.knowledge_agent.run_pipeline or user.is_superuser %}
+        <div class="header-actions">
+            <button class="btn btn-primary" id="btn-run-all" title="Run all pipeline steps">
+                Run Full Pipeline
+            </button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Progress banner (hidden by default) -->
+    <div id="progress-banner" class="progress-banner hidden">
+        <div class="progress-banner-inner">
+            <div class="progress-spinner"></div>
+            <div class="progress-text">
+                <span id="progress-label">Starting ingestion...</span>
+                <span id="progress-step" class="progress-step-label"></span>
+            </div>
+            <div class="progress-bar-wrap">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active strategy selector -->
+    <div class="active-strategy-callout">
+        <span class="callout-label">Active Strategy</span>
+        <select id="active-strategy-select" class="strategy-select">
+            {% for s in strategies %}
+            <option value="{{ s.name }}"
+                    {% if s.is_active %}selected{% endif %}
+                    {% if not s.ready %}disabled{% endif %}>
+                {{ s.name }}{% if not s.ready %} (not ready){% endif %}
+            </option>
+            {% endfor %}
+        </select>
+        <span class="callout-hint">Used by the chat orchestrator when no strategy is specified.</span>
+    </div>
+
+    <!-- Strategy cards -->
+    <div class="strategy-grid">
+        {% for s in strategies %}
+        <div class="strategy-card {% if s.is_active %}strategy-active{% endif %}"
+             data-strategy="{{ s.name }}" id="card-{{ s.name }}">
+
+            <div class="strategy-card-header">
+                <h3 class="strategy-name">{{ s.name }}</h3>
+                <span class="status-pill {% if s.ready %}status-completed{% else %}status-pending{% endif %}">
+                    {% if s.ready %}Ready{% else %}Not ready{% endif %}
+                </span>
+            </div>
+
+            <p class="strategy-description">{{ s.description|truncatewords:30 }}</p>
+
+            <!-- Required tables -->
+            <div class="strategy-tables">
+                <span class="label-sm">Tables</span>
+                {% for t in s.required_tables %}
+                <span class="table-tag">{{ t|cut:"knowledge_" }}</span>
+                {% endfor %}
+            </div>
+
+            <!-- Required steps -->
+            {% if s.step_labels %}
+            <div class="strategy-steps">
+                <span class="label-sm">Required Steps</span>
+                <div class="step-tags">
+                    {% for st in s.step_labels %}
+                    {% if perms.knowledge_agent.run_pipeline or user.is_superuser %}
+                    <button class="btn btn-xs step-run-btn"
+                            data-step="{{ st.key }}"
+                            title="Run {{ st.label }}">
+                        {{ st.label }}
+                    </button>
+                    {% else %}
+                    <span class="step-pill">{{ st.label }}</span>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Actions -->
+            <div class="strategy-actions">
+                {% if not s.is_active %}
+                <button class="btn btn-sm btn-secondary activate-btn"
+                        data-strategy="{{ s.name }}">
+                    Set Active
+                </button>
+                {% else %}
+                <span class="active-badge">Active</span>
+                {% endif %}
+                {% if not s.ready and perms.knowledge_agent.run_pipeline or user.is_superuser %}
+                <button class="btn btn-sm build-btn"
+                        data-steps='{{ s.required_steps|join:"," }}'
+                        data-strategy="{{ s.name }}">
+                    Build
+                </button>
+                {% endif %}
+                {% comment %}Inspect button only for the 3 strategies that produce a visualizable corpus structure.{% endcomment %}
+                {% if s.name == "graphrag" %}
+                <a class="btn btn-sm btn-outline" href="{% url 'knowledge_agent:inspect_graphrag' %}">
+                    Inspect
+                </a>
+                {% elif s.name == "raptor" %}
+                <a class="btn btn-sm btn-outline" href="{% url 'knowledge_agent:inspect_raptor' %}">
+                    Inspect
+                </a>
+                {% elif s.name == "ontology" %}
+                <a class="btn btn-sm btn-outline" href="{% url 'knowledge_agent:inspect_ontology' %}">
+                    Inspect
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Strategy summary table -->
+    <div class="detail-card strategy-overview-card">
+        <h3>Strategy Overview</h3>
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Strategy</th>
+                        <th>Description</th>
+                        <th>Processing Required</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in strategies %}
+                    <tr>
+                        <td>
+                            <span class="mono strategy-table-name">{{ s.name }}</span>
+                        </td>
+                        <td class="strategy-table-desc">{{ s.description|truncatewords:25 }}</td>
+                        <td>
+                            {% for st in s.step_labels %}
+                            <span class="step-pill">{{ st.label }}</span>
+                            {% endfor %}
+                        </td>
+                        <td>
+                            <span class="status-pill {% if s.ready %}status-completed{% else %}status-pending{% endif %}">
+                                {% if s.ready %}Ready{% else %}Not ready{% endif %}
+                            </span>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-muted table-empty-cell">
+                            No strategies registered.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="{% static 'knowledge_agent/js/knowledge.js' %}"></script>
+{% endblock %}

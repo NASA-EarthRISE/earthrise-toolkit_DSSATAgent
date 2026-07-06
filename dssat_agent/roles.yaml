@@ -1,0 +1,83 @@
+groups:
+  - name: dssat_admin
+    display_name: DSSAT Admin
+    description: Full access to all DSSAT operations, experiments, and configuration
+    permissions:
+      - view_experimentsession
+      - add_experimentsession
+      - change_experimentsession
+      - delete_experimentsession
+      - view_all_experiments
+      - manage_config
+      - view_batchexperiment
+      - add_batchexperiment
+      - change_batchexperiment
+      - view_storedsoilprofile
+      - add_storedsoilprofile
+      - change_storedsoilprofile
+      - delete_storedsoilprofile
+      - view_dssatcultivar
+      - add_dssatcultivar
+      - change_dssatcultivar
+      - delete_dssatcultivar
+      - view_dssatecotype
+      - add_dssatecotype
+      - change_dssatecotype
+      - delete_dssatecotype
+
+  - name: researcher
+    display_name: Researcher
+    description: Can run all simulation types and view own experiments
+    permissions:
+      - view_experimentsession
+      - add_experimentsession
+      - view_batchexperiment
+      - add_batchexperiment
+      - view_storedsoilprofile
+      - add_storedsoilprofile
+      - view_dssatcultivar
+      - add_dssatcultivar
+      - view_dssatecotype
+      - add_dssatecotype
+
+  - name: farmer
+    display_name: Farmer
+    description: Can run basic single simulations and view own results
+    permissions:
+      - view_experimentsession
+      - add_experimentsession
+      - view_storedsoilprofile
+
+  - name: extension_agent
+    display_name: Extension Agent
+    description: Can run simulations and create custom soils/cultivars for field work
+    permissions:
+      - view_experimentsession
+      - add_experimentsession
+      - view_batchexperiment
+      - add_batchexperiment
+      - view_storedsoilprofile
+      - add_storedsoilprofile
+      - view_dssatcultivar
+
+  - name: policy_maker
+    display_name: Policy Maker
+    description: Read-only access to simulation results and summaries
+    permissions:
+      - view_experimentsession
+      - view_batchexperiment
+
+  - name: student
+    display_name: Student / Trainee
+    description: Can run simulations with standard access for educational use
+    permissions:
+      - view_experimentsession
+      - add_experimentsession
+      - view_storedsoilprofile
+      - view_dssatcultivar
+
+custom_permissions:
+  - codename: view_all_experiments
+    name: Can view all experiments (admin override)
+  - codename: manage_config
+    name: Can manage DSSAT system configuration

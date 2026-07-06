@@ -1,0 +1,99 @@
+# ---------------------------------------------------------------------------
+# EarthRISEAgents .gitignore
+# ---------------------------------------------------------------------------
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+
+# Virtualenvs
+.venv/
+venv/
+env/
+
+# Django
+db.sqlite3
+db.sqlite3-journal
+/staticfiles/
+/media/
+local_settings.py
+
+# Secrets / environment — commit only the *.example templates
+config.env
+Deployment/**/config.env
+.env
+*.env
+!*.env.example
+!config.env.*.example
+
+# Site-specific K8s overlays (real registry/hosts/nodes). Tracked files are
+# generic templates; copy to *.local.yaml and fill in your values.
+Deployment/K8S/*.local.yaml
+
+# OS / editor cruft
+.DS_Store
+**/.DS_Store
+.vscode/
+.idea/
+*.swp
+
+# Test / tooling caches
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# ---------------------------------------------------------------------------
+# Large data — distributed out-of-band (Google Drive), not in the repo.
+# See README for download instructions.
+# ---------------------------------------------------------------------------
+# Personal scratch data dir
+/data/
+# RAG ingestion corpus (KNOWLEDGE_DOCUMENTS_DIR points at a mounted copy).
+# The corpus itself is external; keep only the .gitkeep so the mount path exists.
+dssat_chat_agent/data/documents/*
+!dssat_chat_agent/data/documents/.gitkeep
+
+# Scratch office docs
+*.rtf
+*.docx
+/docs/Untitled*
+
+# ---------------------------------------------------------------------------
+# Vendored DSSATTools fork — tracked as source (GPLv3), but exclude the
+# Windows-only binary and help files that the Linux runtime never uses.
+# The Linux `dscsm048` binary IS tracked (shipped as package_data; not
+# recompiled at build time — see scripts/build_venv.sh).
+# ---------------------------------------------------------------------------
+dssat_agent/DSSATTools/**/dscsm048.exe
+dssat_agent/DSSATTools/**/*.chm
+dssat_agent/DSSATTools/.vscode/
+# Build-only DSSAT-CSM Fortran source (never compiled here — the amd64 binary
+# is shipped precompiled; mirrors .dockerignore). Only dssat-csm-os/Data (crop
+# genotype/code tables) + bin/dscsm048 are kept as runtime package_data.
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/cmake/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/CMakeLists.txt
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/distclean.cmake
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/CSM_Main/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/InputModule/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Management/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Plant/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Resources/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Soil/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/SPAM/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Utilities/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Weather/
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/*.md
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/license.txt
+dssat_agent/DSSATTools/tests/
+dssat_agent/DSSATTools/docs/
+dssat_agent/DSSATTools/wth_test/
+dssat_agent/DSSATTools/crop_test/
+
+# Local spike/scratch (kept locally, not published)
+scripts/spike_chat_ollama_tools.py

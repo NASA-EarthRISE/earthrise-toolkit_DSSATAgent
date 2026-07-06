@@ -1,0 +1,107 @@
+# =============================================================================
+# Consolidated requirements for EarthRISEAgents
+# Merged from ChatAgent, DataAgent, KnowledgeAgent, SimulationAgent
+# =============================================================================
+#
+# This is the high-level dependency LIST (loose constraints). For REPRODUCIBLE
+# builds, commit a fully pinned lock and install with `pip install -r <lock>`.
+# The fast-moving langchain / langgraph stack in particular can break across
+# minor releases, so a lock is strongly recommended before publishing.
+#
+# ARCHITECTURE MATTERS — the lock is platform-specific:
+#   * requirements.arm64.lock  — DEV freeze on linux/arm64 (Apple Silicon,
+#       Dockerfile.dev). Convenience only; NOT for production.
+#         docker compose exec web pip freeze > requirements.arm64.lock
+#   * requirements.lock        — CANONICAL production lock, generated on
+#       linux/amd64 (prod Dockerfile pins --platform=linux/amd64). Produce it
+#       from the amd64 prod build (run scripts/build_venv.sh in the amd64
+#       image, then `pip freeze`). An arm64 freeze is not guaranteed to
+#       reproduce on amd64 for the binary stack.
+# =============================================================================
+
+# Django and web
+Django>=5.0,<6.0
+gunicorn
+whitenoise
+uvicorn
+asgiref
+
+# Celery and Redis
+celery[redis]
+redis
+
+# Database
+psycopg2-binary
+psycopg[binary]
+
+# PostGIS (for django.contrib.gis)
+# Note: GDAL must be installed at the system level
+
+# LLM and AI (ChatAgent + KnowledgeAgent)
+langchain
+langchain-core
+langchain-community
+langchain-ollama>=1.0.1
+langchain-text-splitters
+langgraph
+langgraph-checkpoint
+langgraph-checkpoint-postgres
+langgraph-prebuilt
+langgraph-sdk
+langsmith
+
+# HTTP client
+httpx
+
+# Data science
+numpy
+pandas
+matplotlib
+
+# Geospatial (DataAgent + SimulationAgent)
+geopandas
+rasterio
+regionmask
+xarray
+dask
+netcdf4
+cfgrib
+eccodes
+
+# Remote data sources (DataAgent)
+requests
+beautifulsoup4
+cdsapi
+
+# RAG / Knowledge (KnowledgeAgent)
+pgvector
+PyMuPDF
+pdfplumber
+tiktoken
+rdflib
+scikit-learn
+
+# DSSATTools runtime deps. The local DSSATTools fork is installed with
+# --no-deps in scripts/build_venv.sh to avoid pip downgrading our packages
+# to its old pinned versions (attrs==21.4.0, certifi==2021.10.8, etc.),
+# so we list its runtime-required deps explicitly here.
+chardet
+rosetta-soil
+
+# A2A protocol (DataAgent standalone mode)
+a2a-sdk[http-server]
+
+# Starlette (standalone agent mode)
+starlette
+
+# Utilities
+python-dotenv
+pydantic
+pydantic-settings
+PyYAML
+python-dateutil
+tqdm
+
+# Testing
+pytest>=7.0
+pytest-django>=4.5

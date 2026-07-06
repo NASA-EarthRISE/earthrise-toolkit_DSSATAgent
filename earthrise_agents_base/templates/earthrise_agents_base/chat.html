@@ -1,0 +1,12 @@
+{% extends "earthrise_agents_base/_chat_page.html" %}
+{% comment %}
+Neutral chat page entry point.
+
+Extends the private _chat_page.html skeleton without overriding any
+branding blocks, so the framework's domain-neutral defaults apply.
+
+A product shell app that wants domain-specific welcome content ships its
+own templates/earthrise_agents_base/chat.html (listing itself BEFORE
+earthrise_agents_base in INSTALLED_APPS) that also extends _chat_page.html
+and fills the blocks. That override wins template resolution.
+{% endcomment %}

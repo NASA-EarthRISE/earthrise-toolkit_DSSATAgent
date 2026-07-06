@@ -1,0 +1,53 @@
+/* Note paragraph above the strategy list. */
+.prefs-strategy-note {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+/* Save button spacing. */
+.save-pref-btn {
+    margin-top: 1rem;
+}
+
+.strategy-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+.strategy-item {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-start;
+    padding: 0.7rem 0.9rem;
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background 0.15s;
+}
+.strategy-item:hover {
+    background: rgba(0,0,0,0.03);
+}
+.strategy-item input[type=radio] {
+    margin-top: 0.3rem;
+    accent-color: var(--primary-color);
+}
+.strategy-item input[type=radio]:disabled + div { opacity: 0.5; cursor: not-allowed; }
+.strategy-item strong { display: block; color: var(--text-primary); font-size: 0.95rem; }
+.strategy-item .helptext { display: block; color: var(--text-muted); font-size: 0.82rem; margin-top: 0.2rem; }
+
+.pill { display: inline-block; padding: 0.05rem 0.4rem; border-radius: 0.3rem; font-size: 0.7rem; margin-left: 0.4rem; font-weight: 500; vertical-align: middle; }
+.pill.ready { background: rgba(22,163,74,0.12); color: #15803d; }
+.pill.not-ready { background: rgba(217,119,6,0.12); color: #b45309; }
+
+/* Save banner — base layout; state variants below. */
+.save-banner {
+    padding: 0.5rem 0.8rem;
+    margin-top: 0.75rem;
+    border-radius: 0.4rem;
+    font-size: 0.85rem;
+    display: none;
+}
+.save-banner.success { background: rgba(22,163,74,0.1); border: 1px solid rgba(22,163,74,0.35); color: #15803d; }
+.save-banner.error { background: color-mix(in srgb, var(--color-hover) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-hover) 35%, transparent); color: var(--color-hover); }

@@ -1,0 +1,492 @@
+/* ===================================
+   Feedback System
+   - Per-message thumbs buttons (chat UI)
+   - Sitewide feedback widget (floating button + modal)
+   - Management admin tables
+   ================================== */
+
+/* --- Anchor highlight (admin "Open chat" deep link) ----------------- */
+
+.message.highlighted {
+    animation: feedback-anchor-flash 2.1s ease;
+}
+
+@keyframes feedback-anchor-flash {
+    0%   { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent); }
+    12%  { box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 55%, transparent); }
+    100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--color-primary) 0%, transparent); }
+}
+
+/* --- Per-message thumbs buttons -------------------------------------- */
+
+.message-feedback {
+    display: flex;
+    gap: 0.25rem;
+    margin-top: 0.375rem;
+    align-items: center;
+    /* Always visible on every assistant message so any of them can be
+     * rated — not just the most recent. Hover feedback lives in the
+     * button-level :hover rules below. */
+    opacity: 1;
+}
+
+.message-feedback-btn {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0.15rem 0.4rem;
+    line-height: 1;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+}
+
+.message-feedback-btn:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+
+.message-feedback-btn.selected[data-rating="up"] {
+    background: rgba(34, 197, 94, 0.12);
+    border-color: rgba(34, 197, 94, 0.55);
+    color: var(--color-success);
+}
+
+.message-feedback-btn.selected[data-rating="down"] {
+    background: color-mix(in srgb, var(--color-hover) 12%, transparent);
+    border-color: color-mix(in srgb, var(--color-hover) 55%, transparent);
+    color: var(--color-hover);
+}
+
+.message-feedback-comment {
+    margin-top: 0.375rem;
+    display: none;
+    gap: 0.375rem;
+    align-items: stretch;
+}
+
+.message-feedback-comment.visible {
+    display: flex;
+}
+
+.message-feedback-comment textarea {
+    flex: 1;
+    min-height: 2.25rem;
+    max-height: 8rem;
+    padding: 0.35rem 0.5rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    color: var(--text-primary);
+    resize: vertical;
+    font-size: 0.85rem;
+    font-family: inherit;
+}
+
+.message-feedback-comment button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.4rem;
+    padding: 0 0.75rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.message-feedback-comment button:hover {
+    background: var(--primary-hover);
+}
+
+.message-feedback-others {
+    margin-top: 0.375rem;
+    padding: 0.4rem 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border-left: 2px solid var(--glass-border);
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.message-feedback-others-title {
+    font-weight: 600;
+    margin-bottom: 0.2rem;
+    color: var(--text-secondary);
+}
+
+.message-feedback-others-item + .message-feedback-others-item {
+    margin-top: 0.2rem;
+}
+
+/* --- Sitewide feedback widget --------------------------------------- */
+
+/* Chat page keeps only the nav-bar entry point — the floating button
+ * would collide with the message input at the bottom-right. */
+body.chat-page .feedback-float-btn { display: none; }
+
+.feedback-float-btn {
+    position: fixed;
+    bottom: 1.25rem;
+    right: 1.25rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 999px;
+    padding: 0.65rem 1.1rem;
+    box-shadow: var(--shadow-menu);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 1400;
+    transition: background 120ms ease, transform 120ms ease;
+}
+
+.feedback-float-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-1px);
+}
+
+.feedback-float-icon {
+    font-size: 1.05rem;
+    line-height: 1;
+}
+
+.nav-feedback-link {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-weight: 500;
+    transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+}
+
+.nav-feedback-link:hover {
+    color: var(--text-primary);
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--color-primary) 8%, transparent);
+}
+
+.feedback-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1500;
+}
+
+.feedback-modal-backdrop[hidden] {
+    display: none;
+}
+
+.feedback-modal {
+    width: min(520px, 92vw);
+    max-height: 90vh;
+    overflow-y: auto;
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 1.25rem;
+    box-shadow: var(--shadow-menu);
+    color: var(--text-primary);
+}
+
+.feedback-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.feedback-modal-header h2 {
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.feedback-modal-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 0.35rem;
+}
+
+.feedback-modal-close:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+
+.feedback-modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.feedback-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.feedback-field-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.feedback-field select,
+.feedback-field textarea,
+.feedback-field input[type="email"] {
+    width: 100%;
+    padding: 0.5rem 0.65rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.45rem;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-family: inherit;
+}
+
+.feedback-field textarea {
+    resize: vertical;
+    min-height: 5rem;
+}
+
+.feedback-field select:focus,
+.feedback-field textarea:focus,
+.feedback-field input[type="email"]:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.feedback-modal-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 0.25rem;
+    gap: 1rem;
+}
+
+.feedback-modal-status {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.feedback-modal-status.error {
+    color: var(--color-hover);
+}
+
+.feedback-modal-status.success {
+    color: var(--color-success);
+}
+
+.feedback-modal-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.feedback-btn-ghost,
+.feedback-btn-primary {
+    padding: 0.45rem 0.95rem;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border: 1px solid transparent;
+    font-family: inherit;
+}
+
+.feedback-btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border-color: var(--glass-border);
+}
+
+.feedback-btn-ghost:hover {
+    background: var(--glass-bg);
+    color: var(--text-primary);
+}
+
+.feedback-btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+.feedback-btn-primary:hover {
+    background: var(--primary-hover);
+}
+
+.feedback-btn-primary:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+/* --- Management tables ------------------------------------------------ */
+
+.feedback-filter-bar {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    padding: 0.5rem 0 0.75rem;
+    flex-wrap: wrap;
+}
+
+.feedback-filter-bar label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.feedback-filter-bar select {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 0.4rem;
+    padding: 0.25rem 0.5rem;
+    font-family: inherit;
+}
+
+.feedback-filter-hint {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-left: auto;
+}
+
+.feedback-table-wrapper {
+    overflow-x: auto;
+}
+
+.feedback-messages-table th,
+.feedback-messages-table td,
+.feedback-site-table th,
+.feedback-site-table td {
+    vertical-align: top;
+    padding: 0.5rem 0.6rem;
+    font-size: 0.85rem;
+}
+
+.feedback-messages-table td.nowrap,
+.feedback-site-table td.nowrap {
+    white-space: nowrap;
+}
+
+.feedback-content-cell {
+    max-width: 26rem;
+    white-space: normal;
+}
+
+.feedback-rating-icon {
+    font-size: 1.1rem;
+}
+
+.feedback-rating-icon.up {
+    color: var(--color-success);
+}
+
+.feedback-rating-icon.down {
+    color: var(--color-hover);
+}
+
+.feedback-site-table textarea {
+    width: 100%;
+    min-height: 2.6rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 0.35rem;
+    padding: 0.3rem 0.45rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    resize: vertical;
+}
+
+.feedback-site-table select {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 0.35rem;
+    padding: 0.25rem 0.4rem;
+    font-family: inherit;
+    font-size: 0.85rem;
+}
+
+.feedback-site-table .btn-sm {
+    margin-top: 0.3rem;
+    padding: 0.25rem 0.6rem;
+    font-size: 0.8rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.35rem;
+    cursor: pointer;
+}
+
+.feedback-site-table .btn-sm:hover {
+    background: var(--primary-hover);
+}
+
+.feedback-row-status {
+    display: inline-block;
+    margin-left: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.feedback-row-status.error {
+    color: var(--color-hover);
+}
+
+.feedback-row-status.success {
+    color: var(--color-success);
+}
+
+.feedback-reviewed-by {
+    margin-top: 0.3rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.feedback-pagination {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.feedback-pagination button {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    border-radius: 0.35rem;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+}
+
+.feedback-pagination button:disabled {
+    opacity: 0.45;
+    cursor: default;
+}
+
+.feedback-pagination button:not(:disabled):hover {
+    border-color: var(--primary-color);
+}
+
+.muted {
+    color: var(--text-muted);
+}

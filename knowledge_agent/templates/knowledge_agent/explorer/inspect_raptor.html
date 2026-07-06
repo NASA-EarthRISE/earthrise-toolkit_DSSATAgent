@@ -1,0 +1,62 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge — RAPTOR inspector{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/knowledge.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/inspect.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="strategies" active_agent="knowledge_agent" %}
+
+<div class="explorer-container">
+
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'knowledge_agent:explorer_index' %}" class="breadcrumb">Strategies</a>
+            <h1>RAPTOR — corpus summary tree</h1>
+            <p class="subtitle">
+                Hierarchical clustering built bottom-up: chunks → cluster
+                summaries → meta-summaries. Click any node to see content.
+            </p>
+        </div>
+    </div>
+
+    <div class="inspect-page">
+        <div class="raptor-controls">
+            <label class="label-sm">Max depth</label>
+            <input type="number" id="raptor-max-depth" value="3" min="1" max="10"
+                   class="depth-input">
+            <button class="btn btn-xs" id="raptor-reload">Reload</button>
+            <span class="raptor-stats" id="raptor-stats"></span>
+        </div>
+
+        <div class="raptor-tree" id="raptor-tree-canvas"></div>
+
+        <div class="raptor-detail">
+            <h4>Selected node</h4>
+            <div class="raptor-detail-body" id="raptor-detail-body">
+                <em>Click a node to inspect.</em>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script id="knowledge-inspect-config" type="application/json">
+{
+    "mode": "corpus",
+    "urls": {
+        "raptor": "{% url 'knowledge_agent:api_inspect_raptor' %}"
+    }
+}
+</script>
+<script src="{% static 'knowledge_agent/js/inspect_config.js' %}"></script>
+<script src="{% static 'knowledge_agent/js/inspect.js' %}"></script>
+
+{% endblock %}

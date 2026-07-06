@@ -1,0 +1,38 @@
+{% extends "shell/base.html" %}
+{% block title %}Treatments - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="treatments" active_agent="dssat_agent" %}
+
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <h1>Treatment Library</h1>
+            <p class="subtitle">
+                Re-usable named treatment protocols. A Treatment carries the per-row
+                FILEX bundle &mdash; cultivar, planting, harvest, initial conditions,
+                simulation controls, and the management blocks. Saved automatically
+                from the wizard or built directly here.
+            </p>
+        </div>
+        <div class="explorer-actions">
+            <input type="search" id="treatments-q" class="form-input treatments-search" placeholder="Search by name...">
+            <select id="treatments-crop" class="form-input treatments-crop-filter">
+                <option value="">All crops</option>
+            </select>
+        </div>
+    </div>
+
+    <div id="treatments-table-wrap">
+        <div class="empty-state small">Loading…</div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    {% load static %}
+    <script src="{% static 'dssat_agent/js/treatments_list.js' %}"></script>
+{% endblock %}

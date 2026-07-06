@@ -1,0 +1,15 @@
+groups:
+  - name: data_admin
+    display_name: Data Admin
+    description: Can manage data sources, ETL jobs, and data agent configuration
+    permissions:
+      - manage_sources
+      - manage_config
+      - view_datafetchjob
+      - add_datafetchjob
+
+custom_permissions:
+  - codename: manage_sources
+    name: Can manage data sources and ETL configuration
+  - codename: manage_config
+    name: Can manage Data agent configuration

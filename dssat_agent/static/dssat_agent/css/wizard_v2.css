@@ -1,0 +1,917 @@
+/* =========================================================================
+   Experiment Wizard v2 — SPA-specific styles.
+
+   The legacy `wizard.css` is kept loaded so existing widgets (event tables,
+   form rows, type cards) inherit their look. This file overrides only the
+   v2-specific chrome (breadcrumb, lock overlay, flash bar, review block).
+   ========================================================================= */
+
+/* Breadcrumb */
+.wizard-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.wizard-bc-dot {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    min-width: 64px;
+    padding: 0.45rem 0.75rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+.wizard-bc-dot:hover { border-color: var(--primary-color); color: var(--text-primary); }
+.wizard-bc-dot.active {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.wizard-bc-dot.locked {
+    background: rgba(34, 197, 94, 0.10);
+    border-color: rgba(34, 197, 94, 0.5);
+    color: #15803d;
+}
+.wizard-bc-num { font-weight: 700; font-size: 1rem; }
+.wizard-bc-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; }
+.wizard-bc-sep {
+    width: 24px;
+    height: 2px;
+    background: var(--glass-border);
+}
+
+/* Status flash */
+.wizard-flash {
+    margin: 0.5rem 0 1rem;
+    padding: 0.65rem 0.85rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--glass-border);
+    font-size: 0.85rem;
+}
+.wizard-flash-info {
+    background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    color: var(--primary-color);
+}
+.wizard-flash-error {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.5);
+    color: var(--color-hover);
+}
+
+/* Step panel content */
+.wizard-step-panel {
+    color: var(--text-primary);
+}
+
+/* Lock overlay (read-only summary card) */
+.wizard-lock-overlay {
+    text-align: center;
+    padding: 1.5rem 1rem;
+    border: 1px dashed rgba(34, 197, 94, 0.5);
+    border-radius: 0.75rem;
+    background: rgba(34, 197, 94, 0.06);
+}
+.wizard-lock-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+.wizard-lock-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 0.25rem;
+}
+.wizard-lock-summary {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-bottom: 0.75rem;
+}
+.btn-edit-locked {
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-secondary);
+    padding: 0.4rem 1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+.btn-edit-locked:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* Bottom nav */
+.wizard-nav {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+}
+.wizard-btn.btn-prev {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+    padding: 0.5rem 1.1rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+}
+.wizard-btn.btn-prev:hover:not(:disabled) {
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.wizard-btn.btn-prev:disabled { opacity: 0.4; cursor: not-allowed; }
+.wizard-btn.btn-next {
+    background: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    color: white;
+    padding: 0.55rem 1.4rem;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    font-weight: 600;
+}
+.wizard-btn.btn-next:hover { filter: brightness(1.1); }
+
+/* Review */
+.review-section {
+    margin: 0.85rem 0;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    background: var(--glass-bg);
+}
+.review-section-title {
+    font-weight: 700;
+    margin: 1rem 0 0.4rem 0;
+    color: var(--text-secondary);
+    font-size: 0.95rem;
+}
+.review-row {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.2rem 0;
+    font-size: 0.85rem;
+}
+.review-label { color: var(--text-muted); min-width: 7rem; }
+.review-value { color: var(--text-primary); }
+.review-list {
+    margin: 0.25rem 0 0.75rem 1.25rem;
+    padding: 0;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+.review-list li { padding: 0.1rem 0; }
+
+/* Field list (Step 3 stub) */
+.wizard-field-list {
+    margin: 0 0 0 1.25rem;
+    padding: 0;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+.wizard-field-list li { padding: 0.15rem 0; }
+
+/* ==========================================================================
+   v2 components: radios, multi-select, pickers, treatment selector,
+   protocol editor, batch matrix.
+   ========================================================================== */
+
+/* Map host */
+.wizard-map-host { position: relative; margin: 0.75rem 0; }
+.wizard-map { border: 1px solid var(--glass-border); border-radius: 0.5rem; }
+.wizard-map-level-select {
+    position: absolute; top: 8px; right: 12px; z-index: 1000;
+    background: var(--color-surface); padding: 0.3rem 0.5rem;
+    border-radius: 0.4rem; border: 1px solid var(--glass-border);
+    box-shadow: var(--shadow-menu);
+    display: flex; gap: 0.4rem; align-items: center;
+    font-size: 0.75rem; color: var(--text-secondary);
+}
+.wizard-map-level-select select {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+    padding: 0.15rem 0.35rem; border-radius: 0.25rem;
+    font-size: 0.75rem;
+}
+
+/* Radio row */
+.wizard-radio-row {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    padding: 0.4rem 0;
+}
+.wizard-radio {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+}
+.wizard-checkbox {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    cursor: pointer; padding: 0.2rem 0;
+    color: var(--text-secondary); font-size: 0.85rem;
+}
+
+/* Form blocks + subhead */
+.wizard-form-block {
+    margin: 0.85rem 0;
+    padding: 0.85rem 1rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+}
+.wizard-form-subhead {
+    font-size: 0.95rem;
+    margin: 0 0 0.6rem 0;
+    color: var(--text-primary);
+}
+.wizard-form-label {
+    color: var(--text-muted); font-size: 0.82rem;
+    align-self: center;
+}
+
+/* Treatment selector */
+.wizard-tselect-host { margin: 0.5rem 0 0.75rem; }
+.wizard-tselect-bar {
+    display: flex; gap: 0.4rem; align-items: center; flex-wrap: wrap;
+    padding: 0.3rem 0;
+}
+.wizard-tselect-label {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    margin-right: 0.4rem;
+}
+.wizard-tselect-tab {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.35rem 0.75rem;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.wizard-tselect-tab:hover { border-color: var(--primary-color); color: var(--text-primary); }
+.wizard-tselect-tab.active {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.wizard-tselect-x {
+    color: var(--text-muted); font-weight: bold;
+    width: 1rem; text-align: center;
+}
+.wizard-tselect-x:hover { color: var(--color-hover); }
+.wizard-tselect-add {
+    padding: 0.35rem 0.75rem;
+    border: 1px dashed var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.wizard-tselect-add:hover { color: var(--primary-color); border-color: var(--primary-color); }
+
+/* Picker modal */
+.wizard-modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.6);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 5000;
+}
+.wizard-modal {
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    width: min(560px, 90vw);
+    max-height: 80vh; display: flex; flex-direction: column;
+    box-shadow: var(--shadow-card);
+}
+.wizard-modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.75rem 1rem; border-bottom: 1px solid var(--glass-border);
+}
+.wizard-modal-header h3 { margin: 0; color: var(--text-primary); }
+.wizard-modal-close {
+    background: transparent; border: 0; color: var(--text-muted);
+    font-size: 1.4rem; cursor: pointer;
+}
+.wizard-modal-body {
+    padding: 0.75rem 1rem;
+    overflow-y: auto;
+}
+.wizard-picker-list, .wizard-picker-list-inline {
+    margin-top: 0.6rem;
+    display: flex; flex-direction: column; gap: 0.25rem;
+    max-height: 50vh; overflow-y: auto;
+}
+.wizard-picker-row {
+    text-align: left;
+    padding: 0.55rem 0.75rem;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.wizard-picker-row:hover {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border-color: var(--primary-color);
+}
+.wizard-picker-list-inline {
+    max-height: 18rem;
+}
+
+/* Step 2 batch states + points */
+.wizard-state-list {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.25rem 0.75rem;
+    max-height: 18rem; overflow-y: auto;
+    margin-top: 0.5rem;
+}
+.wizard-state-row {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    color: var(--text-secondary); font-size: 0.85rem;
+    cursor: pointer;
+}
+.wizard-points-list {
+    display: flex; flex-direction: column; gap: 0.25rem;
+    margin-top: 0.5rem;
+}
+.wizard-points-row {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.35rem 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.35rem;
+    font-size: 0.85rem;
+}
+
+/* Step 3 per-field editor */
+.step3-field-editor { padding: 0.5rem 0; }
+.step3-field-soil, .step3-field-elev {
+    margin-top: 0.85rem;
+    padding: 0.65rem 0.85rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.45rem;
+}
+.step3-field-soil h4, .step3-field-elev h4 {
+    margin: 0 0 0.4rem 0; color: var(--text-primary); font-size: 0.92rem;
+}
+
+/* Step 4 protocol editor */
+.protocol-editor { display: flex; flex-direction: column; gap: 1rem; }
+.protocol-editor-host { margin-top: 0.5rem; }
+.protocol-section {
+    padding: 0.75rem 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.55rem;
+}
+.protocol-section h3 {
+    margin: 0 0 0.65rem 0;
+    font-size: 1rem; color: var(--text-primary);
+}
+.protocol-crop-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+    gap: 0.35rem;
+    max-height: 18rem; overflow-y: auto;
+    margin-top: 0.4rem;
+}
+.protocol-crop-card {
+    text-align: left; padding: 0.45rem 0.65rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 0.1rem;
+    font-size: 0.8rem;
+}
+.protocol-crop-card.selected {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border-color: var(--primary-color);
+    color: var(--primary-color);
+}
+.protocol-mgmt-block {
+    margin-top: 0.6rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px dashed var(--glass-border);
+    border-radius: 0.4rem;
+}
+.protocol-mgmt-head {
+    display: flex; align-items: center; justify-content: space-between;
+}
+.protocol-mgmt-head h4 {
+    margin: 0; color: var(--text-secondary); font-size: 0.85rem;
+    text-transform: uppercase; letter-spacing: 0.04em;
+}
+
+/* Multi-select list */
+.wizard-multiselect {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(13rem, 1fr));
+    gap: 0.2rem 0.5rem;
+    max-height: 14rem; overflow-y: auto;
+    padding: 0.4rem 0.6rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+}
+
+/* Pills + import bar */
+.wizard-pill {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    color: var(--primary-color);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
+    font-size: 0.75rem;
+    margin-left: 0.5rem;
+}
+.wizard-pill-error {
+    background: rgba(239,68,68,0.18);
+    color: var(--color-hover);
+    border-color: rgba(239,68,68,0.45);
+}
+.wizard-import-bar {
+    display: flex; gap: 0.4rem; align-items: center;
+    padding: 0.5rem 0.75rem;
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px dashed var(--glass-border);
+    border-radius: 0.4rem;
+    margin: 0.5rem 0;
+    flex-wrap: wrap;
+}
+
+/* Batch matrix */
+.batch-matrix th, .batch-matrix td {
+    text-align: center; padding: 0.4rem 0.6rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.batch-matrix th:first-child, .batch-matrix td:first-child {
+    text-align: left;
+}
+.batch-matrix .matrix-cell input { transform: scale(1.15); cursor: pointer; }
+
+.wizard-pill-warning {
+    background: rgba(245, 158, 11, 0.18);
+    color: #b45309;
+    border-color: rgba(245, 158, 11, 0.45);
+}
+
+/* DAP event table */
+.dap-event-wrap { margin-top: 0.5rem; }
+.dap-event-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+}
+.dap-event-table th, .dap-event-table td {
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+    text-align: left;
+}
+.dap-event-table th {
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+}
+.dap-event-input {
+    padding: 0.25rem 0.4rem;
+    font-size: 0.82rem;
+}
+.btn-icon-delete {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    width: 1.6rem; height: 1.6rem;
+    border-radius: 0.3rem;
+    cursor: pointer;
+    line-height: 1;
+}
+.btn-icon-delete:hover { color: var(--color-hover); border-color: var(--color-hover); }
+
+/* Step 2 batch — selected-state chips (replaces the old checkbox list) */
+.wizard-state-chips {
+    display: flex; flex-wrap: wrap; gap: 0.35rem;
+    margin-top: 0.5rem;
+    min-height: 1.5rem;
+}
+.wizard-state-chip {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    padding: 0.2rem 0.5rem 0.2rem 0.7rem;
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.5);
+    border-radius: 999px;
+    font-size: 0.82rem;
+    color: #b45309;
+}
+.wizard-state-chip-x {
+    background: transparent; border: 0;
+    color: inherit; opacity: 0.7;
+    cursor: pointer; font-size: 1rem; line-height: 1;
+    padding: 0 0.2rem;
+}
+.wizard-state-chip-x:hover { opacity: 1; }
+
+/* Step 2 batch — mode toggle */
+.wizard-mode-toggle {
+    display: inline-flex;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    margin: 0.5rem 0 1rem;
+}
+.wizard-mode-btn {
+    padding: 0.45rem 1rem;
+    background: rgba(0, 0, 0, 0.04);
+    border: 0;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.wizard-mode-btn + .wizard-mode-btn {
+    border-left: 1px solid var(--glass-border);
+}
+.wizard-mode-btn:hover { color: var(--text-primary); }
+.wizard-mode-btn.active {
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+/* Step 2 batch — state typeahead dropdown */
+.wizard-state-search-wrap { position: relative; }
+.wizard-state-dropdown {
+    position: absolute;
+    top: 100%; left: 0; right: 0;
+    z-index: 1500;
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.4rem;
+    box-shadow: var(--shadow-menu);
+    margin-top: 0.25rem;
+    max-height: 16rem;
+    overflow-y: auto;
+}
+.wizard-state-dropdown-row {
+    display: flex; align-items: center; justify-content: space-between;
+    width: 100%;
+    padding: 0.45rem 0.7rem;
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    text-align: left;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+.wizard-state-dropdown-row:hover {
+    background: color-mix(in srgb, var(--color-primary) 14%, transparent);
+}
+.wizard-state-dropdown-row.selected {
+    color: var(--text-muted);
+}
+.wizard-state-dropdown-tag {
+    font-size: 0.72rem;
+    color: #15803d;
+}
+
+/* Counties-by-state count note */
+.wizard-state-count {
+    margin-top: 0.5rem;
+    font-style: italic;
+}
+
+/* Loading overlay shown while a step's lock hook + transition runs.
+   Step modules can export ``lockProgressLabel(store) -> {title, detail}``
+   to populate context-specific copy. */
+.wizard-loading-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 6000;
+}
+.wizard-loading-card {
+    background: var(--color-surface);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.75rem;
+    padding: 1.5rem 2rem;
+    min-width: min(420px, 80vw);
+    max-width: 90vw;
+    box-shadow: var(--shadow-card);
+    text-align: center;
+    color: var(--text-primary);
+}
+.wizard-loading-card h3 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+.wizard-loading-card p {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    line-height: 1.4;
+}
+.wizard-loading-spinner {
+    margin: 0 auto 0.9rem;
+    width: 30px; height: 30px;
+    border: 3px solid color-mix(in srgb, var(--color-primary) 25%, transparent);
+    border-top-color: var(--primary-color);
+    border-radius: 50%;
+    animation: wizard-spin 0.9s linear infinite;
+}
+@keyframes wizard-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* =========================================================================
+   Searchable picker (V9-parity)
+   .item-card / .item-grid / .selected-chip already live in wizard.css
+   (which the SPA loads alongside this file); we just add the wrapper +
+   a few small layout refinements specific to the v2 use cases.
+   ========================================================================= */
+.searchable-picker { display: flex; flex-direction: column; gap: 0.5rem; }
+.searchable-picker-body { display: flex; flex-direction: column; gap: 0.5rem; }
+
+/* =========================================================================
+   Protocol editor — accordion of crop-gated chips.
+   ========================================================================= */
+.protocol-accordion {
+    display: flex; flex-direction: column;
+    gap: 0.6rem;
+    margin-top: 0.5rem;
+}
+.protocol-chip {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.6rem;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+.protocol-chip-header {
+    display: flex; align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.8rem;
+    cursor: pointer;
+    user-select: none;
+}
+.protocol-chip-index {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 1.6rem; height: 1.6rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.04);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+}
+.protocol-chip-icon { font-size: 1rem; flex-shrink: 0; }
+.protocol-chip-label {
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.protocol-chip-summary {
+    flex: 1 1 auto;
+    color: var(--text-secondary);
+    font-size: 0.84rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+.protocol-chip-meta {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+.protocol-chip-action {
+    background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-primary) 40%, transparent);
+    color: var(--primary-color);
+    border-radius: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.78rem;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.protocol-chip-action:hover {
+    background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+}
+
+/* Chip states */
+.protocol-chip-locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+.protocol-chip-locked .protocol-chip-header {
+    cursor: not-allowed;
+}
+.protocol-chip-locked .protocol-chip-index {
+    background: rgba(0, 0, 0, 0.03);
+    color: var(--text-muted);
+}
+.protocol-chip-empty .protocol-chip-summary { font-style: italic; }
+.protocol-chip-partial {
+    border-color: rgba(245, 158, 11, 0.4);
+    background: rgba(245, 158, 11, 0.06);
+}
+.protocol-chip-partial .protocol-chip-index {
+    background: rgba(245, 158, 11, 0.18);
+    color: #b45309;
+}
+.protocol-chip-complete .protocol-chip-index {
+    background: rgba(34, 197, 94, 0.18);
+    color: #15803d;
+}
+.protocol-chip-complete .protocol-chip-index::after {
+    content: '';
+}
+.protocol-chip-active {
+    border-color: var(--primary-color);
+    background: color-mix(in srgb, var(--color-primary) 6%, transparent);
+}
+.protocol-chip-active .protocol-chip-index {
+    background: color-mix(in srgb, var(--color-primary) 25%, transparent);
+    color: var(--primary-color);
+}
+
+/* Body + footer */
+.protocol-chip-body {
+    padding: 0.5rem 1rem 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+.protocol-chip-footer {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    justify-content: flex-end;
+}
+
+/* Section internals (most use existing .wizard-form-* classes) */
+.protocol-crop-section,
+.protocol-planting-section,
+.protocol-mgmt-section,
+.protocol-ic-section,
+.protocol-sc-section {
+    display: flex; flex-direction: column;
+    gap: 0.75rem;
+}
+.protocol-planting-section h4,
+.protocol-mgmt-section h4 {
+    margin: 0 0 0.4rem;
+    font-size: 0.88rem;
+    color: var(--text-primary);
+}
+
+/* =========================================================================
+   Step 5 review — styled cards + pairings table
+   ========================================================================= */
+.review-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 0.75rem;
+    margin: 0.4rem 0 1rem;
+}
+.review-card {
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.6rem;
+    padding: 0.7rem 0.85rem;
+    display: flex; flex-direction: column;
+    gap: 0.55rem;
+    min-width: 0;
+}
+.review-card-header {
+    display: flex; align-items: center;
+    gap: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--glass-border);
+}
+.review-card-icon {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+}
+.review-card-title {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.92rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.review-card-meta {
+    display: flex; flex-direction: column;
+    gap: 0.25rem;
+    font-size: 0.82rem;
+}
+.review-card-row {
+    display: flex;
+    gap: 0.6rem;
+    align-items: baseline;
+}
+.review-card-label {
+    color: var(--text-muted);
+    flex-shrink: 0;
+    min-width: 4.5rem;
+}
+.review-card-value {
+    color: var(--text-secondary);
+    word-break: break-word;
+    flex: 1 1 auto;
+}
+.review-card-footer {
+    margin-top: 0.2rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-style: italic;
+}
+.review-mgmt-chip {
+    display: inline-block;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    border-radius: 0.35rem;
+    padding: 0.1rem 0.45rem;
+    margin: 0 0.25rem 0.2rem 0;
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+}
+
+/* Pairings collapsible */
+.review-pairings-block {
+    margin-top: 0.5rem;
+    border: 1px solid var(--glass-border);
+    border-radius: 0.5rem;
+    background: rgba(0, 0, 0, 0.03);
+}
+.review-pairings-summary {
+    cursor: pointer;
+    padding: 0.6rem 0.85rem;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 0.88rem;
+}
+.review-pair-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+}
+.review-pair-table thead th {
+    text-align: left;
+    padding: 0.45rem 0.85rem;
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.78rem;
+    border-top: 1px solid var(--glass-border);
+}
+.review-pair-table tbody td {
+    padding: 0.4rem 0.85rem;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--glass-border);
+    word-break: break-word;
+}
+.review-pair-table tbody tr:hover {
+    background: rgba(0, 0, 0, 0.03);
+}
+
+/* Per-card Save / Publish controls + status badge */
+.review-status-badge {
+    font-size: 0.7rem;
+    padding: 0.1rem 0.45rem;
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid var(--glass-border);
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+.review-status-saved {
+    background: color-mix(in srgb, var(--color-primary) 18%, transparent);
+    border-color: color-mix(in srgb, var(--color-primary) 40%, transparent);
+    color: var(--primary-color);
+}
+.review-status-published {
+    background: rgba(34, 197, 94, 0.2);
+    border-color: rgba(34, 197, 94, 0.4);
+    color: #15803d;
+}
+.review-card-actions {
+    margin-top: 0.4rem;
+    padding-top: 0.4rem;
+    border-top: 1px solid var(--glass-border);
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}

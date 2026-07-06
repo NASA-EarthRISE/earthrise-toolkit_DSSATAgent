@@ -1,0 +1,337 @@
+{
+  "autauga": {
+    "name": "Autauga",
+    "bbox": {"west": -86.92, "south": 32.31, "east": -86.41, "north": 32.70},
+    "centroid": {"lat": 32.53, "lon": -86.64}
+  },
+  "baldwin": {
+    "name": "Baldwin",
+    "bbox": {"west": -87.93, "south": 30.22, "east": -87.37, "north": 31.00},
+    "centroid": {"lat": 30.66, "lon": -87.75}
+  },
+  "barbour": {
+    "name": "Barbour",
+    "bbox": {"west": -85.79, "south": 31.62, "east": -85.07, "north": 32.15},
+    "centroid": {"lat": 31.87, "lon": -85.39}
+  },
+  "bibb": {
+    "name": "Bibb",
+    "bbox": {"west": -87.42, "south": 32.74, "east": -86.88, "north": 33.17},
+    "centroid": {"lat": 32.99, "lon": -87.13}
+  },
+  "blount": {
+    "name": "Blount",
+    "bbox": {"west": -86.96, "south": 33.71, "east": -86.30, "north": 34.26},
+    "centroid": {"lat": 33.98, "lon": -86.57}
+  },
+  "bullock": {
+    "name": "Bullock",
+    "bbox": {"west": -85.89, "south": 31.88, "east": -85.41, "north": 32.27},
+    "centroid": {"lat": 32.10, "lon": -85.72}
+  },
+  "butler": {
+    "name": "Butler",
+    "bbox": {"west": -86.91, "south": 31.45, "east": -86.19, "north": 31.83},
+    "centroid": {"lat": 31.75, "lon": -86.68}
+  },
+  "calhoun": {
+    "name": "Calhoun",
+    "bbox": {"west": -86.16, "south": 33.50, "east": -85.60, "north": 33.90},
+    "centroid": {"lat": 33.77, "lon": -85.83}
+  },
+  "chambers": {
+    "name": "Chambers",
+    "bbox": {"west": -85.59, "south": 32.73, "east": -85.05, "north": 33.11},
+    "centroid": {"lat": 32.91, "lon": -85.39}
+  },
+  "cherokee": {
+    "name": "Cherokee",
+    "bbox": {"west": -85.79, "south": 33.90, "east": -85.40, "north": 34.46},
+    "centroid": {"lat": 34.17, "lon": -85.60}
+  },
+  "chilton": {
+    "name": "Chilton",
+    "bbox": {"west": -86.97, "south": 32.66, "east": -86.38, "north": 33.10},
+    "centroid": {"lat": 32.85, "lon": -86.72}
+  },
+  "choctaw": {
+    "name": "Choctaw",
+    "bbox": {"west": -88.47, "south": 31.86, "east": -87.83, "north": 32.31},
+    "centroid": {"lat": 32.02, "lon": -88.26}
+  },
+  "clarke": {
+    "name": "Clarke",
+    "bbox": {"west": -88.09, "south": 31.35, "east": -87.42, "north": 31.89},
+    "centroid": {"lat": 31.68, "lon": -87.83}
+  },
+  "clay": {
+    "name": "Clay",
+    "bbox": {"west": -86.05, "south": 33.10, "east": -85.53, "north": 33.50},
+    "centroid": {"lat": 33.27, "lon": -85.86}
+  },
+  "cleburne": {
+    "name": "Cleburne",
+    "bbox": {"west": -85.74, "south": 33.49, "east": -85.21, "north": 33.97},
+    "centroid": {"lat": 33.67, "lon": -85.52}
+  },
+  "coffee": {
+    "name": "Coffee",
+    "bbox": {"west": -86.19, "south": 31.18, "east": -85.59, "north": 31.62},
+    "centroid": {"lat": 31.40, "lon": -85.98}
+  },
+  "colbert": {
+    "name": "Colbert",
+    "bbox": {"west": -88.14, "south": 34.53, "east": -87.53, "north": 34.93},
+    "centroid": {"lat": 34.70, "lon": -87.80}
+  },
+  "conecuh": {
+    "name": "Conecuh",
+    "bbox": {"west": -87.22, "south": 31.08, "east": -86.50, "north": 31.53},
+    "centroid": {"lat": 31.43, "lon": -86.99}
+  },
+  "coosa": {
+    "name": "Coosa",
+    "bbox": {"west": -86.25, "south": 32.73, "east": -85.65, "north": 33.19},
+    "centroid": {"lat": 32.94, "lon": -86.00}
+  },
+  "covington": {
+    "name": "Covington",
+    "bbox": {"west": -86.70, "south": 30.99, "east": -86.04, "north": 31.52},
+    "centroid": {"lat": 31.25, "lon": -86.45}
+  },
+  "crenshaw": {
+    "name": "Crenshaw",
+    "bbox": {"west": -86.38, "south": 31.45, "east": -85.79, "north": 31.89},
+    "centroid": {"lat": 31.73, "lon": -86.31}
+  },
+  "cullman": {
+    "name": "Cullman",
+    "bbox": {"west": -87.10, "south": 33.88, "east": -86.41, "north": 34.31},
+    "centroid": {"lat": 34.13, "lon": -86.87}
+  },
+  "dale": {
+    "name": "Dale",
+    "bbox": {"west": -85.89, "south": 31.18, "east": -85.41, "north": 31.62},
+    "centroid": {"lat": 31.43, "lon": -85.61}
+  },
+  "dallas": {
+    "name": "Dallas",
+    "bbox": {"west": -87.47, "south": 32.05, "east": -86.72, "north": 32.48},
+    "centroid": {"lat": 32.33, "lon": -87.08}
+  },
+  "dekalb": {
+    "name": "DeKalb",
+    "bbox": {"west": -86.06, "south": 34.20, "east": -85.46, "north": 34.72},
+    "centroid": {"lat": 34.46, "lon": -85.80}
+  },
+  "elmore": {
+    "name": "Elmore",
+    "bbox": {"west": -86.41, "south": 32.30, "east": -85.80, "north": 32.66},
+    "centroid": {"lat": 32.60, "lon": -86.15}
+  },
+  "escambia": {
+    "name": "Escambia",
+    "bbox": {"west": -87.62, "south": 30.99, "east": -86.90, "north": 31.35},
+    "centroid": {"lat": 31.13, "lon": -87.16}
+  },
+  "etowah": {
+    "name": "Etowah",
+    "bbox": {"west": -86.37, "south": 33.82, "east": -85.78, "north": 34.26},
+    "centroid": {"lat": 34.05, "lon": -86.04}
+  },
+  "fayette": {
+    "name": "Fayette",
+    "bbox": {"west": -87.95, "south": 33.52, "east": -87.42, "north": 33.89},
+    "centroid": {"lat": 33.72, "lon": -87.73}
+  },
+  "franklin": {
+    "name": "Franklin",
+    "bbox": {"west": -88.17, "south": 34.26, "east": -87.53, "north": 34.57},
+    "centroid": {"lat": 34.44, "lon": -87.84}
+  },
+  "geneva": {
+    "name": "Geneva",
+    "bbox": {"west": -86.19, "south": 30.99, "east": -85.49, "north": 31.42},
+    "centroid": {"lat": 31.10, "lon": -85.84}
+  },
+  "greene": {
+    "name": "Greene",
+    "bbox": {"west": -88.18, "south": 32.49, "east": -87.52, "north": 32.93},
+    "centroid": {"lat": 32.70, "lon": -87.95}
+  },
+  "hale": {
+    "name": "Hale",
+    "bbox": {"west": -87.87, "south": 32.49, "east": -87.17, "north": 32.93},
+    "centroid": {"lat": 32.76, "lon": -87.63}
+  },
+  "henry": {
+    "name": "Henry",
+    "bbox": {"west": -85.59, "south": 31.32, "east": -85.05, "north": 31.78},
+    "centroid": {"lat": 31.52, "lon": -85.24}
+  },
+  "houston": {
+    "name": "Houston",
+    "bbox": {"west": -85.59, "south": 31.00, "east": -85.07, "north": 31.39},
+    "centroid": {"lat": 31.15, "lon": -85.30}
+  },
+  "jackson": {
+    "name": "Jackson",
+    "bbox": {"west": -86.32, "south": 34.59, "east": -85.58, "north": 34.99},
+    "centroid": {"lat": 34.78, "lon": -85.97}
+  },
+  "jefferson": {
+    "name": "Jefferson",
+    "bbox": {"west": -87.12, "south": 33.34, "east": -86.58, "north": 33.76},
+    "centroid": {"lat": 33.55, "lon": -86.89}
+  },
+  "lamar": {
+    "name": "Lamar",
+    "bbox": {"west": -88.27, "south": 33.52, "east": -87.83, "north": 33.89},
+    "centroid": {"lat": 33.79, "lon": -88.09}
+  },
+  "lauderdale": {
+    "name": "Lauderdale",
+    "bbox": {"west": -87.83, "south": 34.66, "east": -87.21, "north": 34.99},
+    "centroid": {"lat": 34.90, "lon": -87.65}
+  },
+  "lawrence": {
+    "name": "Lawrence",
+    "bbox": {"west": -87.53, "south": 34.30, "east": -86.88, "north": 34.69},
+    "centroid": {"lat": 34.52, "lon": -87.31}
+  },
+  "lee": {
+    "name": "Lee",
+    "bbox": {"west": -85.69, "south": 32.41, "east": -85.05, "north": 32.75},
+    "centroid": {"lat": 32.60, "lon": -85.35}
+  },
+  "limestone": {
+    "name": "Limestone",
+    "bbox": {"west": -87.26, "south": 34.53, "east": -86.59, "north": 34.99},
+    "centroid": {"lat": 34.81, "lon": -86.97}
+  },
+  "lowndes": {
+    "name": "Lowndes",
+    "bbox": {"west": -86.82, "south": 31.98, "east": -86.22, "north": 32.41},
+    "centroid": {"lat": 32.17, "lon": -86.58}
+  },
+  "macon": {
+    "name": "Macon",
+    "bbox": {"west": -86.01, "south": 32.24, "east": -85.43, "north": 32.66},
+    "centroid": {"lat": 32.44, "lon": -85.69}
+  },
+  "madison": {
+    "name": "Madison",
+    "bbox": {"west": -86.79, "south": 34.53, "east": -86.30, "north": 34.99},
+    "centroid": {"lat": 34.76, "lon": -86.55}
+  },
+  "marengo": {
+    "name": "Marengo",
+    "bbox": {"west": -88.07, "south": 31.93, "east": -87.23, "north": 32.49},
+    "centroid": {"lat": 32.25, "lon": -87.75}
+  },
+  "marion": {
+    "name": "Marion",
+    "bbox": {"west": -88.17, "south": 34.05, "east": -87.63, "north": 34.46},
+    "centroid": {"lat": 34.25, "lon": -87.89}
+  },
+  "marshall": {
+    "name": "Marshall",
+    "bbox": {"west": -86.59, "south": 34.10, "east": -85.95, "north": 34.59},
+    "centroid": {"lat": 34.37, "lon": -86.31}
+  },
+  "mobile": {
+    "name": "Mobile",
+    "bbox": {"west": -88.43, "south": 30.23, "east": -87.92, "north": 31.09},
+    "centroid": {"lat": 30.69, "lon": -88.20}
+  },
+  "monroe": {
+    "name": "Monroe",
+    "bbox": {"west": -87.62, "south": 31.35, "east": -86.91, "north": 31.89},
+    "centroid": {"lat": 31.57, "lon": -87.37}
+  },
+  "montgomery": {
+    "name": "Montgomery",
+    "bbox": {"west": -86.50, "south": 32.05, "east": -85.93, "north": 32.49},
+    "centroid": {"lat": 32.22, "lon": -86.21}
+  },
+  "morgan": {
+    "name": "Morgan",
+    "bbox": {"west": -87.11, "south": 34.25, "east": -86.45, "north": 34.61},
+    "centroid": {"lat": 34.45, "lon": -86.85}
+  },
+  "perry": {
+    "name": "Perry",
+    "bbox": {"west": -87.53, "south": 32.31, "east": -86.91, "north": 32.74},
+    "centroid": {"lat": 32.64, "lon": -87.30}
+  },
+  "pickens": {
+    "name": "Pickens",
+    "bbox": {"west": -88.27, "south": 32.93, "east": -87.66, "north": 33.52},
+    "centroid": {"lat": 33.28, "lon": -88.09}
+  },
+  "pike": {
+    "name": "Pike",
+    "bbox": {"west": -86.09, "south": 31.62, "east": -85.48, "north": 32.06},
+    "centroid": {"lat": 31.80, "lon": -85.95}
+  },
+  "randolph": {
+    "name": "Randolph",
+    "bbox": {"west": -85.74, "south": 33.10, "east": -85.13, "north": 33.49},
+    "centroid": {"lat": 33.29, "lon": -85.46}
+  },
+  "russell": {
+    "name": "Russell",
+    "bbox": {"west": -85.43, "south": 32.06, "east": -84.99, "north": 32.54},
+    "centroid": {"lat": 32.29, "lon": -85.18}
+  },
+  "shelby": {
+    "name": "Shelby",
+    "bbox": {"west": -87.04, "south": 33.10, "east": -86.38, "north": 33.50},
+    "centroid": {"lat": 33.27, "lon": -86.66}
+  },
+  "st. clair": {
+    "name": "St. Clair",
+    "bbox": {"west": -86.59, "south": 33.56, "east": -86.05, "north": 33.94},
+    "centroid": {"lat": 33.71, "lon": -86.31}
+  },
+  "sumter": {
+    "name": "Sumter",
+    "bbox": {"west": -88.47, "south": 32.31, "east": -87.83, "north": 32.93},
+    "centroid": {"lat": 32.59, "lon": -88.20}
+  },
+  "talladega": {
+    "name": "Talladega",
+    "bbox": {"west": -86.36, "south": 33.10, "east": -85.71, "north": 33.58},
+    "centroid": {"lat": 33.40, "lon": -86.16}
+  },
+  "tallapoosa": {
+    "name": "Tallapoosa",
+    "bbox": {"west": -86.02, "south": 32.63, "east": -85.39, "north": 33.10},
+    "centroid": {"lat": 32.86, "lon": -85.80}
+  },
+  "tuscaloosa": {
+    "name": "Tuscaloosa",
+    "bbox": {"west": -87.84, "south": 32.93, "east": -87.09, "north": 33.52},
+    "centroid": {"lat": 33.29, "lon": -87.52}
+  },
+  "walker": {
+    "name": "Walker",
+    "bbox": {"west": -87.42, "south": 33.60, "east": -86.88, "north": 34.10},
+    "centroid": {"lat": 33.80, "lon": -87.18}
+  },
+  "washington": {
+    "name": "Washington",
+    "bbox": {"west": -88.43, "south": 31.07, "east": -87.82, "north": 31.68},
+    "centroid": {"lat": 31.41, "lon": -88.21}
+  },
+  "wilcox": {
+    "name": "Wilcox",
+    "bbox": {"west": -87.47, "south": 31.73, "east": -86.72, "north": 32.14},
+    "centroid": {"lat": 31.99, "lon": -87.10}
+  },
+  "winston": {
+    "name": "Winston",
+    "bbox": {"west": -87.60, "south": 33.88, "east": -87.09, "north": 34.31},
+    "centroid": {"lat": 34.15, "lon": -87.37}
+  }
+}

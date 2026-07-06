@@ -1,0 +1,179 @@
+{% extends "shell/base.html" %}
+{% block title %}Weather Explorer - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/weather.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="weather" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <h1>Weather Data Availability</h1>
+        <p class="subtitle">Check available weather data by source and date range</p>
+    </div>
+
+    <div class="detail-grid stacked">
+        <div class="detail-card">
+            <h3>Check Availability</h3>
+            <form id="weather-check-form" class="create-form">
+                <div class="form-group">
+                    <label>Source Type</label>
+                    <div class="tab-bar" id="source-type-toggle">
+                        <button type="button" class="tab active" data-source-type="qualified">Qualified Inputs</button>
+                        <button type="button" class="tab" data-source-type="combined">Combined Inputs</button>
+                    </div>
+                    <p class="form-hint" id="source-type-hint">Single sources that provide all DSSAT variables (tmax, tmin, rain, srad)</p>
+                </div>
+                <div class="form-group">
+                    <label for="weather-source">Data Source</label>
+                    <select id="weather-source" class="form-input">
+                        <option value="">-- Select Source --</option>
+                        <option value="all">All Sources</option>
+                        {% for key, info in qualified_sources.items %}
+                        <option value="{{ key }}" data-type="qualified">{{ info.name|default:key }}</option>
+                        {% endfor %}
+                        {% for key, info in combined_sources.items %}
+                        <option value="{{ key }}" data-type="combined">{{ info.name|default:key }}</option>
+                        {% endfor %}
+                        {% if not qualified_sources and not combined_sources %}
+                            <option value="power" data-type="qualified">NASA POWER</option>
+                            <option value="era5" data-type="qualified">ERA5</option>
+                            <option value="agera5" data-type="qualified">AgERA5</option>
+                        {% endif %}
+                    </select>
+                </div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="start-date">Start Date</label>
+                        <input type="date" id="start-date" class="form-input" value="2020-01-01">
+                    </div>
+                    <div class="form-group">
+                        <label for="end-date">End Date</label>
+                        <input type="date" id="end-date" class="form-input" value="2020-12-31">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Location (optional)</label>
+                    <div class="tab-bar mb-075" id="location-type-toggle">
+                        <button type="button" class="tab active" data-location-type="bbox">Bounding Box</button>
+                        <button type="button" class="tab" data-location-type="point">Point</button>
+                    </div>
+                </div>
+                <div id="location-bbox-inputs">
+                    <div class="form-grid cols-4">
+                        <div class="form-group">
+                            <label for="bbox-west">West</label>
+                            <input type="number" step="any" id="bbox-west" class="form-input" placeholder="-180">
+                        </div>
+                        <div class="form-group">
+                            <label for="bbox-south">South</label>
+                            <input type="number" step="any" id="bbox-south" class="form-input" placeholder="-90">
+                        </div>
+                        <div class="form-group">
+                            <label for="bbox-east">East</label>
+                            <input type="number" step="any" id="bbox-east" class="form-input" placeholder="180">
+                        </div>
+                        <div class="form-group">
+                            <label for="bbox-north">North</label>
+                            <input type="number" step="any" id="bbox-north" class="form-input" placeholder="90">
+                        </div>
+                    </div>
+                </div>
+                <div id="location-point-inputs" class="is-hidden">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="point-lat">Latitude</label>
+                            <input type="number" step="any" id="point-lat" class="form-input" placeholder="0.0">
+                        </div>
+                        <div class="form-group">
+                            <label for="point-lon">Longitude</label>
+                            <input type="number" step="any" id="point-lon" class="form-input" placeholder="0.0">
+                        </div>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary">Check Availability</button>
+            </form>
+        </div>
+
+        <div class="detail-card wide">
+            <h3>Results</h3>
+            <div id="weather-results">
+                <div class="empty-state small">
+                    <p>Select a source and date range, then click "Check Availability".</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="detail-card mt-15" id="qualified-table" >
+        <h3>Qualified Inputs</h3>
+        <p class="subtitle mb-075">Single data sources providing all 4 DSSAT weather variables</p>
+        {% if qualified_sources %}
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Name</th>
+                        <th>Resolution</th>
+                        <th>Variables</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, info in qualified_sources.items %}
+                    <tr>
+                        <td class="mono">{{ key }}</td>
+                        <td>{{ info.name|default:key }}</td>
+                        <td>{{ info.resolution|default:"—" }}</td>
+                        <td>{{ info.variables|join:", "|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state small"><p>No qualified sources available.</p></div>
+        {% endif %}
+    </div>
+
+    <div class="detail-card mt-15 is-hidden" id="combined-table">
+        <h3>Combined Inputs</h3>
+        <p class="subtitle mb-075">Merged from multiple sources to provide complete DSSAT coverage</p>
+        {% if combined_sources %}
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Source</th>
+                        <th>Name</th>
+                        <th>Resolution</th>
+                        <th>Rain</th>
+                        <th>Tmax</th>
+                        <th>Tmin</th>
+                        <th>Srad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for key, info in combined_sources.items %}
+                    <tr>
+                        <td class="mono">{{ key }}</td>
+                        <td>{{ info.name|default:key }}</td>
+                        <td>{{ info.target_resolution|default:"—" }}</td>
+                        <td>{{ info.rain_source|default:"—" }}</td>
+                        <td>{{ info.tmax_source|default:"—" }}</td>
+                        <td>{{ info.tmin_source|default:"—" }}</td>
+                        <td>{{ info.srad_source|default:"—" }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state small"><p>No combined sources available.</p></div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

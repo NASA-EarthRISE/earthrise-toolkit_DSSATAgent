@@ -1,0 +1,56 @@
+{% extends "shell/base.html" %}
+{% block title %}Ecotype {{ ecotype_code }} - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/ecotype_detail.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="crops" active_agent="dssat_agent" %}
+<div class="explorer-container">
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:crop_detail' crop_code=crop_code %}{% if dssat_model %}?dssat_model={{ dssat_model }}{% endif %}" class="breadcrumb">&larr; {{ crop_code }} Crop</a>
+            <h1>
+                Ecotype: {{ ecotype_code }}
+                {% if ecotype.source %}<span class="source-badge {{ ecotype.source }}">{{ ecotype.source }}</span>{% endif %}
+            </h1>
+            <span class="subtitle mono">{{ crop_code }}{% if ecotype.dssat_model %} / {{ ecotype.dssat_model }}{% endif %}</span>
+        </div>
+        <div class="header-actions">
+            {% if ecotype.source == 'custom' or ecotype.source == 'cloned' %}
+            <a href="{% url 'dssat_agent:crop_ecotype_edit' crop_code=crop_code ecotype_id=ecotype.id %}?dssat_model={{ dssat_model }}" class="btn btn-ghost">Edit</a>
+            {% endif %}
+        </div>
+    </div>
+
+    {% if ecotype.params %}
+    <div class="detail-grid">
+        <div class="detail-card wide">
+            <h3>Ecotype Parameters</h3>
+            <dl class="detail-list">
+                {% if ecotype.ecotype_name %}
+                <dt>Name</dt>
+                <dd>{{ ecotype.ecotype_name }}</dd>
+                {% endif %}
+                {% for key, value in ecotype.params.items %}
+                <dt>{{ key }}</dt>
+                <dd>{{ value|default:"—" }}</dd>
+                {% endfor %}
+            </dl>
+        </div>
+    </div>
+    {% elif ecotype.error %}
+    <div class="empty-state">
+        <h3>Error</h3>
+        <p>{{ ecotype.error }}</p>
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <h3>Ecotype not found</h3>
+        <p>Could not load details for ecotype {{ ecotype_code }}.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

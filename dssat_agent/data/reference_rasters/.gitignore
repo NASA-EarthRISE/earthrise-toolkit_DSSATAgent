@@ -1,0 +1,6 @@
+# Auto-downloaded reference rasters — fetched on first boot by
+# dssat_agent/startup/reference_rasters.py and not committed because
+# the source is large (SRTM SE-US clip is ~50–70 MB compressed).
+# Files explicitly committed elsewhere (soil_types.tif, PlantingDateV2.tif,
+# soil_types_legend.csv, se_us_ssurgo.sol) are not affected.
+srtm_v1.tif

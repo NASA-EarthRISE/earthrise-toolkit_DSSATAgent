@@ -1,0 +1,1211 @@
+# =============================================================================
+# Data sources configuration for dssat_agent
+#
+# This file declares two distinct families of data sources, loaded at app
+# startup via dssat_agent/apps.py:_do_register():
+#
+#   1. raster_sources[]:
+#      Time-series weather rasters (e.g. NASA POWER, CHIRPS) loaded by the
+#      ETL pipeline. Each variable lives in its own PostGIS table named
+#      ``{schema}.{table_prefix}_{var}``. Used by the existing weather
+#      query path (data_agent.services.query_raster_data).
+#
+#   2. reference_rasters[]:
+#      Static categorical/scalar reference rasters (e.g. soil-type lookup,
+#      typical planting date) loaded by dssat_agent/startup/reference_rasters.py.
+#      Each raster lives in a SINGLE PostGIS table with all bands intact.
+#      Queried via data_agent.services.sample_raster_at_point().
+#
+# Subtype naming convention to keep the two families from colliding:
+#   - Weather sources use natural names like ``nasa_power_daily``, ``chirps``.
+#   - Reference rasters use the prefix ``dssat_*_lookup_v{N}`` (e.g.
+#     ``dssat_soil_lookup_v1``, ``dssat_planting_date_lookup_v1``). The
+#     trailing version number lets us migrate to a new dataset without
+#     breaking existing experiments that reference the old one.
+#
+# RasterDataset.dataset_information layout for each family:
+#   raster_sources[*]      → subroutines.load_to_postgis.table_prefix
+#                            (one PostGIS table per variable)
+#   reference_rasters[*]   → subroutines.reference_lookup.table_name
+#                            (one PostGIS table per raster, all bands inside)
+#                          + value_type ('categorical' | 'scalar' | 'continuous')
+#                          + band_meanings ({band_idx: meaning, ...})
+#                          + no_data_value
+#                          + coverage_extent ({type: 'bbox' | 'global' | 'country', ...})
+#                          + tiff_hash, legend_hash, soil_profiles_hash
+#                            (idempotency markers — re-load only when changed)
+#
+# Schema placeholder: ${SCHEMA} — resolved at runtime by the ETL pipeline.
+# =============================================================================
+
+raster_sources:
+  # -------------------------------------------------------------------------
+  # Single-source datasets
+  # -------------------------------------------------------------------------
+  single:
+    # -- Observational sources ------------------------------------------------
+    - name: nasa_power
+      dataset_name: "NASA POWER Daily"
+      dataset_subtype: nasa_power_daily
+      tds_product_name: NASA-POWER
+      tds_region: Global
+      tds_spatial_resolution: "0.5deg"
+      tds_temporal_resolution: daily
+      number: 1
+      data_category: observational_and_forecast
+      data_type: point
+      variables: [tmax, tmin, rain, srad]
+      dataset_information:
+        metadata:
+          description: "NASA POWER Daily Weather"
+          source: "NASA/POWER MERRA-2 + CERES"
+          contact: "power@larc.nasa.gov"
+          version: "2.0"
+          reference: "https://power.larc.nasa.gov/"
+          temporal_resolution: daily
+          spatial_resolution: "0.5 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: power
+          unit_conversions:
+            T2M_MAX:
+              operation: rename
+              target_name: tmax
+            T2M_MIN:
+              operation: rename
+              target_name: tmin
+            PRECTOTCORR:
+              operation: rename
+              target_name: rain
+            ALLSKY_SFC_SW_DWN:
+              operation: rename
+              target_name: srad
+          expand_bbox:
+            min_range: 2.0
+        granule_info:
+          primary_key: power_daily
+          fetch_config:
+            format: regional_json_api
+            grid_resolution: 0.5
+            nodata_value: -999
+            # NASA POWER daily regional API rejects ranges > 366 days per request.
+            query_limits:
+              max_days_per_request: 366
+            url_template: "https://power.larc.nasa.gov/api/temporal/daily/regional?parameters={parameter}&community=AG&longitude-min={bbox_west}&latitude-min={bbox_south}&longitude-max={bbox_east}&latitude-max={bbox_north}&start={start_date}&end={end_date}&format=JSON"
+            variable_map:
+              T2M_MAX: tmax
+              T2M_MIN: tmin
+              PRECTOTCORR: rain
+              ALLSKY_SFC_SW_DWN: srad
+          file_info_by_key:
+            power_daily:
+              preformat_source: >-
+                https://power.larc.nasa.gov/api/temporal/daily/regional
+                ?parameters=T2M_MAX,T2M_MIN,PRECTOTCORR,ALLSKY_SFC_SW_DWN
+                &community=AG&longitude-min={bbox_west}&latitude-min={bbox_south}
+                &longitude-max={bbox_east}&latitude-max={bbox_north}
+                &start={start_date}&end={end_date}&format=JSON
+              source_type: api
+              variables:
+                T2M_MAX:
+                  original_variable: T2M_MAX
+                T2M_MIN:
+                  original_variable: T2M_MIN
+                PRECTOTCORR:
+                  original_variable: PRECTOTCORR
+                ALLSKY_SFC_SW_DWN:
+                  original_variable: ALLSKY_SFC_SW_DWN
+
+    - name: chirps
+      dataset_name: "CHIRPS v2.0 Daily"
+      dataset_subtype: chirps_daily
+      tds_product_name: CHIRPS
+      tds_region: Global
+      tds_spatial_resolution: "0.05deg"
+      tds_temporal_resolution: daily
+      number: 2
+      data_category: observational
+      data_type: raster
+      variables: [rain]
+      dataset_information:
+        metadata:
+          description: "CHIRPS Daily Rainfall"
+          source: "CHC/UCSB"
+          contact: "pete@geog.ucsb.edu"
+          version: "2.0"
+          reference: "https://www.chc.ucsb.edu/data/chirps"
+          temporal_resolution: daily
+          spatial_resolution: "0.05 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: chirps
+        granule_info:
+          primary_key: rainfall
+          fetch_config:
+            format: file_download
+            file_format: tif_gz
+            variables:
+              - target_variable: rain
+                url_template: "https://data.chc.ucsb.edu/products/CHIRPS-2.0/global_daily/tifs/p05/{YYYY}/chirps-v2.0.{YYYY}.{MM}.{DD}.tif.gz"
+          file_info_by_key:
+            rainfall:
+              preformat_source: >-
+                https://data.chc.ucsb.edu/products/CHIRPS-2.0/
+                global_daily/tifs/p05/{YYYY}/
+                chirps-v2.0.{YYYY}.{MM}.{DD}.tif.gz
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: rain
+
+    - name: chirts
+      dataset_name: "CHIRTS Daily Temperature"
+      dataset_subtype: chirts_daily
+      tds_product_name: CHIRTS
+      tds_region: Global
+      tds_spatial_resolution: "0.05deg"
+      tds_temporal_resolution: daily
+      number: 3
+      data_category: observational
+      data_type: raster
+      variables: [tmax, tmin]
+      # CHIRTSdaily v1.0 final archive covers 1983-01-01 → 2016-12-31. The CHC
+      # server 403s requests for dates outside this window. Recent data lives
+      # in a separate product (CHIRTS-ERA5), which is not wired up here. The
+      # startup backfill skips sources whose availability window doesn't
+      # overlap the requested range.
+      available_from: "1983-01-01"
+      available_to: "2016-12-31"
+      dataset_information:
+        metadata:
+          description: "CHIRTS Daily Temperature"
+          source: "CHC/UCSB"
+          contact: "pete@geog.ucsb.edu"
+          version: "1.0"
+          reference: "https://www.chc.ucsb.edu/data/chirts"
+          temporal_resolution: daily
+          spatial_resolution: "0.05 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: chirts
+        granule_info:
+          primary_key: temperature
+          fetch_config:
+            format: file_download
+            file_format: tif
+            variables:
+              - target_variable: tmax
+                url_template: "https://data.chc.ucsb.edu/products/CHIRTSdaily/v1.0/global_tifs_p05/Tmax/{YYYY}/Tmax.{YYYY}.{MM}.{DD}.tif"
+              - target_variable: tmin
+                url_template: "https://data.chc.ucsb.edu/products/CHIRTSdaily/v1.0/global_tifs_p05/Tmin/{YYYY}/Tmin.{YYYY}.{MM}.{DD}.tif"
+          file_info_by_key:
+            tmax:
+              preformat_source: >-
+                https://data.chc.ucsb.edu/products/CHIRTSdaily/
+                v1.0/global_tifs_p05/Tmax/{YYYY}/
+                Tmax.{YYYY}.{MM}.{DD}.tif
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: tmax
+            tmin:
+              preformat_source: >-
+                https://data.chc.ucsb.edu/products/CHIRTSdaily/
+                v1.0/global_tifs_p05/Tmin/{YYYY}/
+                Tmin.{YYYY}.{MM}.{DD}.tif
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: tmin
+
+    - name: era5
+      dataset_name: "ERA5 Reanalysis Daily"
+      dataset_subtype: era5_daily
+      tds_product_name: ERA5
+      tds_region: Global
+      tds_spatial_resolution: "0.25deg"
+      tds_temporal_resolution: daily
+      number: 4
+      data_category: observational
+      data_type: raster
+      variables: [tmax, tmin, rain, srad]
+      dataset_information:
+        metadata:
+          description: "ERA5 Reanalysis Daily Weather"
+          source: "ECMWF/Copernicus CDS"
+          contact: "copernicus-support@ecmwf.int"
+          version: "5.0"
+          reference: "https://cds.climate.copernicus.eu/"
+          temporal_resolution: daily
+          spatial_resolution: "0.25 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: era5
+          unit_conversions:
+            t2m_max:
+              operation: rename
+              target_name: tmax
+            t2m_min:
+              operation: rename
+              target_name: tmin
+            total_precipitation:
+              operation: multiply
+              value: 1000
+              target_name: rain
+            surface_solar_radiation_downwards:
+              operation: divide
+              value: 86400
+              target_name: srad
+        granule_info:
+          primary_key: era5_daily
+          fetch_config:
+            format: xarray_slice
+            transport: cds_api
+            cds_product: reanalysis-era5-single-levels
+            include_day_range: true
+            cds_request_extras:
+              product_type: [reanalysis]
+              time:
+                - "00:00"
+                - "01:00"
+                - "02:00"
+                - "03:00"
+                - "04:00"
+                - "05:00"
+                - "06:00"
+                - "07:00"
+                - "08:00"
+                - "09:00"
+                - "10:00"
+                - "11:00"
+                - "12:00"
+                - "13:00"
+                - "14:00"
+                - "15:00"
+                - "16:00"
+                - "17:00"
+                - "18:00"
+                - "19:00"
+                - "20:00"
+                - "21:00"
+                - "22:00"
+                - "23:00"
+            cds_variable_groups:
+              - variables: [2m_temperature]
+              - variables: [total_precipitation]
+              - variables: [surface_solar_radiation_downwards]
+            daily_aggregation:
+              t2m_max:
+                cds_var: 2m_temperature
+                method: max
+              t2m_min:
+                cds_var: 2m_temperature
+                method: min
+              total_precipitation:
+                cds_var: total_precipitation
+                method: sum
+              surface_solar_radiation_downwards:
+                cds_var: surface_solar_radiation_downwards
+                method: sum
+            variable_map:
+              2m_temperature: [tmax, tmin]
+              total_precipitation: rain
+              surface_solar_radiation_downwards: srad
+          file_info_by_key:
+            era5_daily:
+              preformat_source: "cds://reanalysis-era5-single-levels"
+              source_type: api
+              scrape_options:
+                cds_product: reanalysis-era5-single-levels
+              variables:
+                t2m_max:
+                  original_variable: 2m_temperature
+                  aggregation: max
+                t2m_min:
+                  original_variable: 2m_temperature
+                  aggregation: min
+                total_precipitation:
+                  original_variable: total_precipitation
+                  aggregation: sum
+                surface_solar_radiation_downwards:
+                  original_variable: surface_solar_radiation_downwards
+                  aggregation: sum
+
+    - name: agera5
+      dataset_name: "AgERA5 Agrometeorological Daily"
+      dataset_subtype: agera5_daily
+      tds_product_name: AgERA5
+      tds_region: Global
+      tds_spatial_resolution: "0.1deg"
+      tds_temporal_resolution: daily
+      number: 5
+      data_category: observational
+      data_type: raster
+      variables: [tmax, tmin, rain, srad]
+      dataset_information:
+        metadata:
+          description: "AgERA5 Agrometeorological Daily Weather"
+          source: "Copernicus CDS"
+          contact: "copernicus-support@ecmwf.int"
+          version: "1.1"
+          reference: "https://cds.climate.copernicus.eu/"
+          temporal_resolution: daily
+          spatial_resolution: "0.1 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: agera5
+          # IMPORTANT: keys here must match the *yield_source* the CDS
+          # pipeline emits in etl_pipeline.py (lowercase variable_map keys,
+          # with `_max`/`_min` suffixes for split temperatures), NOT the
+          # CDS request-form names. Mismatched keys silently no-op via the
+          # variable_map fallback, which (a) misnames the table for split
+          # temperatures (the variable_map has `2m_temperature` not the
+          # suffixed form) and (b) skips any numeric transform.
+          # AgERA5 v1.1 precipitation_flux is already in mm/day — no
+          # 86400 multiplier; just a rename.
+          unit_conversions:
+            2m_temperature_max:
+              operation: rename
+              target_name: tmax
+            2m_temperature_min:
+              operation: rename
+              target_name: tmin
+            precipitation_flux:
+              operation: rename
+              target_name: rain
+            solar_radiation_flux:
+              operation: rename
+              target_name: srad
+        granule_info:
+          primary_key: agera5_daily
+          fetch_config:
+            format: xarray_slice
+            transport: cds_api
+            cds_product: sis-agrometeorological-indicators
+            # Request the whole [start, end] window per CDS call — without this
+            # the CDS request only asks for a single day.
+            include_day_range: true
+            cds_request_extras:
+              version: "1_1"
+            cds_variable_groups:
+              - variables: [2m_temperature]
+                extras:
+                  statistic: 24_hour_maximum
+              - variables: [2m_temperature]
+                extras:
+                  statistic: 24_hour_minimum
+              - variables: [precipitation_flux]
+                extras:
+                  statistic: 24_hour_mean
+              - variables: [solar_radiation_flux]
+                extras:
+                  statistic: 24_hour_mean
+            variable_map:
+              2m_temperature: [tmax, tmin]
+              precipitation_flux: rain
+              solar_radiation_flux: srad
+          file_info_by_key:
+            agera5_daily:
+              preformat_source: "cds://sis-agrometeorological-indicators"
+              source_type: api
+              scrape_options:
+                cds_product: sis-agrometeorological-indicators
+              variables:
+                Temperature_Air_2m_Max_24h:
+                  original_variable: 2m_temperature_max
+                Temperature_Air_2m_Min_24h:
+                  original_variable: 2m_temperature_min
+                Precipitation_Flux:
+                  original_variable: precipitation_flux
+                Solar_Radiation_Flux:
+                  original_variable: solar_radiation_flux
+
+    - name: prism
+      dataset_name: "PRISM Daily"
+      dataset_subtype: prism_daily
+      tds_product_name: PRISM
+      tds_region: CONUS
+      tds_spatial_resolution: "0.04deg"
+      tds_temporal_resolution: daily
+      number: 6
+      data_category: observational
+      data_type: raster
+      # `srad` uses PRISM's `soltotal` variable (total global shortwave
+      # irradiance on a horizontal surface), released March 2026.
+      variables: [tmax, tmin, rain, srad]
+      # Dev test override: NACSE enforces a 2-downloads-per-file-per-day
+      # limit per IP and our Jan 2024 dates are already rate-limited. Use a
+      # 3-day window far from previously-requested dates so we can smoke-test
+      # the pipeline without burning more quota. Production (K8s) ignores
+      # these when STARTUP_FETCH_START/END or the defaults set the range —
+      # these overrides only apply when fetch_all_time_series encounters
+      # them and clamps this source's window accordingly.
+      backfill_start: "2024-06-15"
+      backfill_end: "2024-06-17"
+      dataset_information:
+        metadata:
+          description: "PRISM Daily Weather (~4km)"
+          source: "Oregon State University / PRISM Climate Group"
+          contact: "prism_climate@nacse.org"
+          version: "AN/LT"
+          reference: "https://prism.oregonstate.edu/"
+          temporal_resolution: daily
+          spatial_resolution: "~4km (~0.04 degrees)"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: prism
+        granule_info:
+          primary_key: prism_daily
+          fetch_config:
+            format: file_download
+            # NACSE returns a ZIP containing BIL+HDR for historical dates and a
+            # raw COG GeoTIFF for very recent ones; the `zip_bil` handler
+            # detects the PK header and takes the right path for both.
+            file_format: zip_bil
+            variables:
+              - target_variable: rain
+                url_template: "https://services.nacse.org/prism/data/get/us/4km/ppt/{YYYYMMDD}"
+              - target_variable: tmax
+                url_template: "https://services.nacse.org/prism/data/get/us/4km/tmax/{YYYYMMDD}"
+              - target_variable: tmin
+                url_template: "https://services.nacse.org/prism/data/get/us/4km/tmin/{YYYYMMDD}"
+              - target_variable: srad
+                url_template: "https://services.nacse.org/prism/data/get/us/4km/soltotal/{YYYYMMDD}"
+          file_info_by_key:
+            ppt:
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: rain
+            tmax:
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: tmax
+            tmin:
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: tmin
+            soltotal:
+              source_type: https_anchor
+              variables:
+                "0":
+                  original_variable: srad
+
+    # -- Forecast sources -----------------------------------------------------
+    - name: open_meteo
+      dataset_name: "Open-Meteo Ensemble Forecast"
+      dataset_subtype: open_meteo_ensemble
+      tds_product_name: Open-Meteo
+      tds_region: Global
+      tds_spatial_resolution: "0.25deg"
+      tds_temporal_resolution: daily
+      number: 7
+      data_category: forecast
+      data_type: point
+      variables: [tmax, tmin, rain, srad]
+      dataset_information:
+        metadata:
+          description: "Open-Meteo ECMWF IFS Ensemble Forecast"
+          source: "Open-Meteo / ECMWF"
+          version: "1.0"
+          reference: "https://open-meteo.com/en/docs/ensemble-api"
+          temporal_resolution: daily
+          spatial_resolution: "0.25 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: open_meteo
+          unit_conversions:
+            temperature_2m_max:
+              operation: rename
+              target_name: tmax
+            temperature_2m_min:
+              operation: rename
+              target_name: tmin
+            precipitation_sum:
+              operation: rename
+              target_name: rain
+            shortwave_radiation_sum:
+              operation: rename
+              target_name: srad
+        granule_info:
+          fetch_config:
+            format: point_api_grid
+            grid_resolution: 0.25
+            url_template: "https://ensemble-api.open-meteo.com/v1/ensemble?latitude={lat}&longitude={lon}&daily=temperature_2m_max,temperature_2m_min,precipitation_sum,shortwave_radiation_sum&models=ecmwf_ifs025&start_date={start_date}&end_date={end_date}"
+            variable_map:
+              temperature_2m_max: tmax
+              temperature_2m_min: tmin
+              precipitation_sum: rain
+              shortwave_radiation_sum: srad
+
+    - name: nmme
+      dataset_name: "NMME Climate Forecast"
+      dataset_subtype: nmme_monthly
+      tds_product_name: NMME
+      tds_region: Global
+      tds_spatial_resolution: "1.0deg"
+      tds_temporal_resolution: daily
+      number: 8
+      data_category: forecast
+      data_type: raster
+      variables: [tmax, tmin, rain]
+      dataset_information:
+        metadata:
+          description: "NMME Multi-Model Ensemble Climate Forecast"
+          source: "NOAA/PSL"
+          version: "1.0"
+          reference: "https://www.cpc.ncep.noaa.gov/products/NMME/"
+          temporal_resolution: monthly
+          spatial_resolution: "1.0 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: nmme
+          unit_conversions:
+            tmax:
+              operation: rename
+              target_name: tmax
+            tmin:
+              operation: rename
+              target_name: tmin
+            prate:
+              operation: rename
+              target_name: rain
+        granule_info:
+          fetch_config:
+            format: xarray_slice
+            transport: opendap
+            ensemble_dims: [ensemble, ens, member, M]
+            base_url: "https://psl.noaa.gov/thredds/dodsC/Datasets/NMME"
+            models: [CCSM4, GEM_NEMO, GFDL-SPEAR, CanCM4i]
+            variable_map:
+              tmax: tmax
+              tmin: tmin
+              prate: rain
+
+    - name: seas5
+      dataset_name: "SEAS5 Seasonal Forecast"
+      dataset_subtype: seas5_seasonal
+      tds_product_name: SEAS5
+      tds_region: Global
+      tds_spatial_resolution: "1.0deg"
+      tds_temporal_resolution: daily
+      number: 9
+      data_category: forecast
+      data_type: raster
+      variables: [tmax, tmin, rain, srad]
+      dataset_information:
+        metadata:
+          description: "ECMWF SEAS5 Seasonal Forecast"
+          source: "ECMWF / Copernicus CDS"
+          version: "5.0"
+          reference: "https://cds.climate.copernicus.eu/"
+          temporal_resolution: daily
+          spatial_resolution: "1.0 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: seas5
+          unit_conversions:
+            maximum_2m_temperature_in_the_last_24_hours:
+              operation: rename
+              target_name: tmax
+            minimum_2m_temperature_in_the_last_24_hours:
+              operation: rename
+              target_name: tmin
+            total_precipitation:
+              operation: multiply
+              value: 1000
+              target_name: rain
+            surface_solar_radiation_downwards:
+              operation: rename
+              target_name: srad
+        granule_info:
+          fetch_config:
+            format: xarray_slice
+            transport: cds_api
+            ensemble_dims: [number, ensemble, member, realization]
+            cds_product: seasonal-original-single-levels
+            cds_request_extras:
+              originating_centre: ecmwf
+              system: "51"
+              day: "01"
+              # leadtime_hour: 24-hour steps from 24 to 5160 (215 values)
+              leadtime_hour:
+                - "24"
+                - "48"
+                - "72"
+                - "96"
+                - "120"
+                - "144"
+                - "168"
+                - "192"
+                - "216"
+                - "240"
+                - "264"
+                - "288"
+                - "312"
+                - "336"
+                - "360"
+                - "384"
+                - "408"
+                - "432"
+                - "456"
+                - "480"
+                - "504"
+                - "528"
+                - "552"
+                - "576"
+                - "600"
+                - "624"
+                - "648"
+                - "672"
+                - "696"
+                - "720"
+                - "744"
+                - "768"
+                - "792"
+                - "816"
+                - "840"
+                - "864"
+                - "888"
+                - "912"
+                - "936"
+                - "960"
+                - "984"
+                - "1008"
+                - "1032"
+                - "1056"
+                - "1080"
+                - "1104"
+                - "1128"
+                - "1152"
+                - "1176"
+                - "1200"
+                - "1224"
+                - "1248"
+                - "1272"
+                - "1296"
+                - "1320"
+                - "1344"
+                - "1368"
+                - "1392"
+                - "1416"
+                - "1440"
+                - "1464"
+                - "1488"
+                - "1512"
+                - "1536"
+                - "1560"
+                - "1584"
+                - "1608"
+                - "1632"
+                - "1656"
+                - "1680"
+                - "1704"
+                - "1728"
+                - "1752"
+                - "1776"
+                - "1800"
+                - "1824"
+                - "1848"
+                - "1872"
+                - "1896"
+                - "1920"
+                - "1944"
+                - "1968"
+                - "1992"
+                - "2016"
+                - "2040"
+                - "2064"
+                - "2088"
+                - "2112"
+                - "2136"
+                - "2160"
+                - "2184"
+                - "2208"
+                - "2232"
+                - "2256"
+                - "2280"
+                - "2304"
+                - "2328"
+                - "2352"
+                - "2376"
+                - "2400"
+                - "2424"
+                - "2448"
+                - "2472"
+                - "2496"
+                - "2520"
+                - "2544"
+                - "2568"
+                - "2592"
+                - "2616"
+                - "2640"
+                - "2664"
+                - "2688"
+                - "2712"
+                - "2736"
+                - "2760"
+                - "2784"
+                - "2808"
+                - "2832"
+                - "2856"
+                - "2880"
+                - "2904"
+                - "2928"
+                - "2952"
+                - "2976"
+                - "3000"
+                - "3024"
+                - "3048"
+                - "3072"
+                - "3096"
+                - "3120"
+                - "3144"
+                - "3168"
+                - "3192"
+                - "3216"
+                - "3240"
+                - "3264"
+                - "3288"
+                - "3312"
+                - "3336"
+                - "3360"
+                - "3384"
+                - "3408"
+                - "3432"
+                - "3456"
+                - "3480"
+                - "3504"
+                - "3528"
+                - "3552"
+                - "3576"
+                - "3600"
+                - "3624"
+                - "3648"
+                - "3672"
+                - "3696"
+                - "3720"
+                - "3744"
+                - "3768"
+                - "3792"
+                - "3816"
+                - "3840"
+                - "3864"
+                - "3888"
+                - "3912"
+                - "3936"
+                - "3960"
+                - "3984"
+                - "4008"
+                - "4032"
+                - "4056"
+                - "4080"
+                - "4104"
+                - "4128"
+                - "4152"
+                - "4176"
+                - "4200"
+                - "4224"
+                - "4248"
+                - "4272"
+                - "4296"
+                - "4320"
+                - "4344"
+                - "4368"
+                - "4392"
+                - "4416"
+                - "4440"
+                - "4464"
+                - "4488"
+                - "4512"
+                - "4536"
+                - "4560"
+                - "4584"
+                - "4608"
+                - "4632"
+                - "4656"
+                - "4680"
+                - "4704"
+                - "4728"
+                - "4752"
+                - "4776"
+                - "4800"
+                - "4824"
+                - "4848"
+                - "4872"
+                - "4896"
+                - "4920"
+                - "4944"
+                - "4968"
+                - "4992"
+                - "5016"
+                - "5040"
+                - "5064"
+                - "5088"
+                - "5112"
+                - "5136"
+                - "5160"
+              data_format: grib
+            variable_map:
+              maximum_2m_temperature_in_the_last_24_hours: tmax
+              minimum_2m_temperature_in_the_last_24_hours: tmin
+              total_precipitation: rain
+              surface_solar_radiation_downwards: srad
+
+    - name: cfsv2
+      dataset_name: "CFSv2 Seasonal Forecast"
+      dataset_subtype: cfsv2_seasonal
+      tds_product_name: CFSv2
+      tds_region: Global
+      tds_spatial_resolution: "0.5deg"
+      tds_temporal_resolution: daily
+      number: 10
+      data_category: forecast
+      data_type: raster
+      variables: [tmax, tmin, rain, srad]
+      dataset_information:
+        metadata:
+          description: "NCEP CFSv2 Seasonal Forecast"
+          source: "NOAA/NCEP"
+          version: "2.0"
+          reference: "https://www.ncei.noaa.gov/products/weather-climate-models/climate-forecast-system"
+          temporal_resolution: daily
+          spatial_resolution: "0.5 degrees"
+        subroutines:
+          load_to_postgis:
+            schema: "${SCHEMA}"
+            table_prefix: cfsv2
+          unit_conversions:
+            tmax:
+              operation: rename
+              target_name: tmax
+            tmin:
+              operation: rename
+              target_name: tmin
+            prate:
+              operation: multiply
+              value: 86400
+              target_name: rain
+            dswsfc:
+              operation: multiply
+              value: 86400
+              target_name: srad
+        granule_info:
+          fetch_config:
+            format: grib2_bands
+            base_url: "https://noaa-cfs-pds.s3.amazonaws.com"
+            variable_map:
+              tmax: tmax
+              tmin: tmin
+              prate: rain
+              dswsfc: srad
+            members: [1, 2, 3, 4]
+            init_hours: ["00"]
+
+  # -------------------------------------------------------------------------
+  # Combined-source datasets
+  # -------------------------------------------------------------------------
+  combined:
+    - name: chirps_chirts_era5
+      rain_source: chirps
+      tmax_source: chirts
+      tmin_source: chirts
+      srad_source: era5
+      target_resolution: 0.05
+      table_prefix: chirps_chirts_era5
+
+    - name: chirps_chirts_power
+      rain_source: chirps
+      tmax_source: chirts
+      tmin_source: chirts
+      srad_source: power
+      target_resolution: 0.05
+      table_prefix: chirps_chirts_power
+
+    - name: chirps_chirts_agera5
+      rain_source: chirps
+      tmax_source: chirts
+      tmin_source: chirts
+      srad_source: agera5
+      target_resolution: 0.05
+      table_prefix: chirps_chirts_agera5
+
+    - name: chirps_era5
+      rain_source: chirps
+      tmax_source: era5
+      tmin_source: era5
+      srad_source: era5
+      target_resolution: 0.05
+      table_prefix: chirps_era5
+
+    - name: chirps_agera5
+      rain_source: chirps
+      tmax_source: agera5
+      tmin_source: agera5
+      srad_source: agera5
+      target_resolution: 0.05
+      table_prefix: chirps_agera5
+
+    - name: chirps_power
+      rain_source: chirps
+      tmax_source: power
+      tmin_source: power
+      srad_source: power
+      target_resolution: 0.05
+      table_prefix: chirps_power
+
+    - name: prism_era5
+      rain_source: prism
+      tmax_source: prism
+      tmin_source: prism
+      srad_source: era5
+      target_resolution: 0.04
+      table_prefix: prism_era5
+
+    - name: prism_power
+      rain_source: prism
+      tmax_source: prism
+      tmin_source: prism
+      srad_source: power
+      target_resolution: 0.04
+      table_prefix: prism_power
+
+    - name: prism_agera5
+      rain_source: prism
+      tmax_source: prism
+      tmin_source: prism
+      srad_source: agera5
+      target_resolution: 0.04
+      table_prefix: prism_agera5
+
+# =============================================================================
+# Vector data sources (admin boundaries)
+# =============================================================================
+vector_sources:
+  - name: admin_countries
+    label: Countries
+    level: 0
+    source_url: "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/gadm41_USA.gpkg"
+    table_name: admin
+    metadata:
+      format: gpkg
+      layer_names: ["ADM_ADM_0", "gadm41_USA_0"]
+      geometry_type: MultiPolygon
+      srid: 4326
+      columns:
+        country: ["COUNTRY", "NAME_0"]
+      admin_level: 0
+
+  - name: admin_states
+    label: States
+    level: 1
+    source_url: "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/gadm41_USA.gpkg"
+    table_name: admin
+    metadata:
+      format: gpkg
+      layer_names: ["ADM_ADM_1", "gadm41_USA_1"]
+      geometry_type: MultiPolygon
+      srid: 4326
+      columns:
+        country: ["COUNTRY", "NAME_0"]
+        admin1: ["NAME_1", "name_1"]
+      admin_level: 1
+
+  - name: admin_counties
+    label: Counties
+    level: 2
+    source_url: "https://geodata.ucdavis.edu/gadm/gadm4.1/gpkg/gadm41_USA.gpkg"
+    table_name: admin
+    metadata:
+      format: gpkg
+      layer_names: ["ADM_ADM_2", "gadm41_USA_2"]
+      geometry_type: MultiPolygon
+      srid: 4326
+      columns:
+        country: ["COUNTRY", "NAME_0"]
+        admin1: ["NAME_1", "name_1"]
+        admin2: ["NAME_2", "name_2"]
+      admin_level: 2
+
+# =============================================================================
+# Reference rasters — static categorical/scalar lookups for the wizard's
+# in-situ data step. Loaded by dssat_agent/startup/reference_rasters.py.
+#
+# Each entry produces:
+#   - One PostGIS table per raster (all bands intact, queried via
+#     data_agent.services.sample_raster_at_point()).
+#   - One RasterDataset row keyed by `name` (used as dataset_subtype).
+#   - Optionally: SoilTypeRasterLegend rows from `legend.file`.
+#   - Optionally: StoredSoilProfile rows seeded from `soil_profiles_file`.
+#
+# All three loads are independently idempotent by SHA-256 file hash.
+# =============================================================================
+
+reference_rasters:
+  - name: dssat_soil_lookup_v1
+    dataset_name: "Southeast USA Soil Profiles"
+    file: reference_rasters/soil_types.tif
+    dataset_type: static
+    temporal_resolution: static
+    spatial_resolution: "0.047deg"
+    domain: soil
+    purpose: in_situ_soil_lookup
+    value_type: categorical
+    band_meanings:
+      1: dominant
+      2: second_dominant
+      3: third_dominant
+    variables:
+      dominant:
+        display_name: "Dominant Soil Type"
+        variable_type: categorical
+        has_legend: true
+      second_dominant:
+        display_name: "2nd Dominant Soil"
+        variable_type: categorical
+        has_legend: true
+      third_dominant:
+        display_name: "3rd Dominant Soil"
+        variable_type: categorical
+        has_legend: true
+    variable_display_names:
+      dominant: "Dominant Soil Type"
+      second_dominant: "2nd Dominant Soil"
+      third_dominant: "3rd Dominant Soil"
+    no_data_value: 0
+    coverage_extent:
+      type: bbox
+      min_lat: 24.84
+      max_lat: 35.27
+      min_lon: -88.52
+      max_lon: -78.47
+    subroutines:
+      reference_lookup:
+        table_name: dataagent.dssat_soil_lookup_v1
+    legend:
+      type: csv
+      file: reference_rasters/soil_types_legend.csv
+      value_column: band_value
+      key_column: soil_code
+      label_column: description
+    # SE-US SSURGO soil profiles that the legend's soil_codes reference.
+    # Seeded into StoredSoilProfile alongside raster registration so the
+    # legend resolves to real profiles that simulations can run with.
+    soil_profiles_file: reference_rasters/se_us_ssurgo.sol
+
+  - name: dssat_planting_date_lookup_v1
+    dataset_name: "Southeast USA Maize Planting Dates"
+    file: reference_rasters/PlantingDateV2.tif
+    dataset_type: static
+    temporal_resolution: static
+    spatial_resolution: "0.047deg"
+    domain: planting
+    purpose: in_situ_planting_date
+    value_type: scalar
+    units: julian_day
+    band_meanings:
+      1: typical_planting_julian_day
+    variables:
+      typical_planting_julian_day:
+        display_name: "Typical Planting Day (Julian)"
+        variable_type: numeric
+        color_map:
+          ramp: [[90,50,150,50],[110,150,255,50],[130,255,200,50]]
+          chart_color: "rgba(34,197,94,0.9)"
+          label: "Planting Day (Julian)"
+    variable_display_names:
+      typical_planting_julian_day: "Typical Planting Day (Julian)"
+    no_data_value: -999
+    coverage_extent:
+      type: bbox
+      min_lat: 24.82
+      max_lat: 35.25
+      min_lon: -88.50
+      max_lon: -78.44
+    subroutines:
+      reference_lookup:
+        table_name: dataagent.dssat_planting_date_lookup_v1
+
+  # ---------------------------------------------------------------------------
+  # SRTM elevation (static, SE-US clip). Used for the wizard's
+  # "Auto-fill elevation" button. Matches the BBOX of the existing in-house
+  # in-situ rasters above so the entire wizard flow has consistent coverage.
+  #
+  # First-boot ingest is automatic via the ``auto_download`` block:
+  # ``dssat_agent/startup/reference_rasters.py`` fetches the minimum set of
+  # CGIAR-CSI 5°×5° SRTM tiles covering ``coverage_extent``, mosaics +
+  # clips them with gdalwarp, and saves the result here. The intermediate
+  # tile zips/tifs are deleted after the clip — final on-disk footprint is
+  # just this clipped tif (~50 MB), not the multi-GB global product.
+  #
+  # No auth required. If CGIAR-CSI is unreachable the loader skips this
+  # entry (logged warning) and the rest of the system still boots without
+  # elevation; you can also drop a clipped tif at the target path manually
+  # to bypass the downloader entirely.
+  # ---------------------------------------------------------------------------
+  - name: srtm_v1
+    dataset_name: "SRTM Elevation (SE-US, 90m)"
+    file: reference_rasters/srtm_v1.tif
+    dataset_type: static
+    temporal_resolution: static
+    # Source SRTM is 90 m / 0.00083°, but we resample on download to ~1 km
+    # (0.01°) — that's plenty for DSSAT's elevation uses (vapor pressure
+    # adjustments, reference ET) and drops the SE-US clip from millions of
+    # PostGIS rows to ~100, eliminating the memory pressure on map-tile
+    # rendering and zonal-stats queries.
+    spatial_resolution: "0.01deg"
+    domain: elevation
+    purpose: auto_elevation
+    value_type: scalar
+    units: meters
+    band_meanings:
+      1: elevation_m
+    variables:
+      elevation_m:
+        display_name: "Elevation (m)"
+        variable_type: numeric
+        color_map:
+          ramp: [[0, 0, 100, 0], [500, 200, 200, 100], [2000, 200, 100, 50], [4000, 255, 255, 255]]
+          chart_color: "rgba(120,120,120,0.9)"
+          label: "Elevation (m)"
+    variable_display_names:
+      elevation_m: "Elevation (m)"
+    no_data_value: -32768
+    coverage_extent:
+      type: bbox
+      # Union of dssat_soil_lookup_v1 and dssat_planting_date_lookup_v1
+      # bboxes — keeps elevation valid wherever soil/planting in-situ work.
+      min_lat: 24.82
+      max_lat: 35.27
+      min_lon: -88.52
+      max_lon: -78.44
+    # First-boot auto-download. Provider determines tile URL convention;
+    # bbox + target_resolution_deg control the gdalwarp output.
+    auto_download:
+      provider: cgiar_csi_srtm_v4_1
+      # Resample SRTM 90m → ~1 km on download. We don't need 90 m for
+      # elevation in crop modeling (vapor pressure / reference ET use
+      # elevation at single-digit-meter sensitivity). Resampling here
+      # avoids materialising the 90 m raster locally at all.
+      target_resolution_deg: 0.01
+    ingest:
+      # At ~1 km the SE-US clip is ~1000×1000 px. ``-t 100x100`` puts each
+      # PostGIS row at ~100 km² (1°×1°), giving ~100 rows total — small
+      # enough that ST_Union over the table is fast and bounded, but
+      # granular enough that ST_Intersects skips most rows for any small
+      # query envelope.
+      tile_size: 100x100
+    subroutines:
+      reference_lookup:
+        table_name: dataagent.srtm_v1

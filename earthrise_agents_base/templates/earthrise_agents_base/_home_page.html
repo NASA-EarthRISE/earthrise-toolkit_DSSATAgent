@@ -1,0 +1,88 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}{{ agent_name }} - Home{% endblock %}
+
+{# Feedback widget is suppressed on the home page. #}
+{% block sitewide_feedback %}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/home.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'earthrise_agents_base/js/home.js' %}"></script>
+{% endblock %}
+
+{% block body %}
+{% comment %}
+    Floating user pill in the top-right — same dropdown as the nav bar
+    uses on other pages, minus the full nav since the home is a landing
+    page without page-level navigation.
+{% endcomment %}
+{% include "earthrise_agents_base/partials/_user_menu.html" with extra_class="home-user-pill" %}
+
+<div class="home-container">
+    <div class="home-card">
+        <div class="home-logo">{% block home_logo %}💬{% endblock %}</div>
+        <h1 class="home-title">{{ agent_name }}</h1>
+        <p class="home-subtitle">Your AI-powered research assistant</p>
+
+        {# Featured card — always first. #}
+        <div class="entry-cards">
+            <div class="entry-card">
+                <div class="entry-card-icon">💬</div>
+                <div class="entry-card-title">Start a Conversation</div>
+                <div class="entry-card-badge badge-recommended">Recommended</div>
+                <div class="entry-card-desc">
+                    Tell me what you'd like to do and I'll guide you through it.
+                </div>
+                <form method="POST" action="{% url 'earthrise_agents_base:new_chat' %}">
+                    {% csrf_token %}
+                    <button type="submit" class="entry-card-action btn-primary">Start</button>
+                </form>
+            </div>
+        </div>
+
+        {% comment %}
+            One horizontally-scrollable row per agent, labeled with the
+            agent's display name. Cards inside use the gallery-card style
+            (compact, fixed width, fade-mask on the right to hint scroll).
+        {% endcomment %}
+        {% for section in home_card_sections %}
+        <div class="home-module">
+            <div class="home-module-title">{{ section.label }}</div>
+            <div class="home-card-row" data-home-row>
+                {% for card in section.cards %}
+                <a href="{{ card.url }}" class="home-gallery-card accent-{{ card.color }}">
+                    <div class="icon">{{ card.icon }}</div>
+                    <div class="title">{{ card.label }}</div>
+                    <div class="desc">{{ card.description }}</div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if recent_chats %}
+        <div class="divider"><span>Recent Conversations</span></div>
+        <div class="recent-chats-section">
+            {% for chat in recent_chats %}
+            <a href="{% url 'earthrise_agents_base:chat' chat_id=chat.id %}" class="recent-chat-item">
+                <div class="recent-chat-info">
+                    <div class="recent-chat-title">
+                        {{ chat.title|default:"Untitled Chat" }}
+                    </div>
+                    <div class="recent-chat-date">{{ chat.updated_at|date:"M j, Y - g:i A" }}</div>
+                </div>
+                <div class="recent-chat-arrow">→</div>
+            </a>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="divider"><span>No conversations yet</span></div>
+        <div class="no-chats">Start your first conversation to get started!</div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

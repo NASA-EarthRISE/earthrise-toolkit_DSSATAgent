@@ -1,0 +1,79 @@
+{% extends "shell/base.html" %}
+{% block title %}Map Explorer - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/map.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="map" active_agent="dssat_agent" %}
+<div class="map-page">
+    <div class="map-controls">
+        <div class="control-group">
+            <label for="map-source">Source</label>
+            <select id="map-source">
+                {% for key, info in qualified_sources.items %}
+                <option value="{{ key }}">{{ info.name|default:key }}</option>
+                {% endfor %}
+                {% for key, info in combined_sources.items %}
+                <option value="{{ key }}">{{ info.name|default:key }}</option>
+                {% endfor %}
+                {% if not qualified_sources and not combined_sources %}
+                <option value="power">NASA POWER</option>
+                <option value="era5">ERA5</option>
+                <option value="agera5">AgERA5</option>
+                {% endif %}
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="map-variable">Variable</label>
+            <select id="map-variable">
+                <option value="tmax">Max Temp</option>
+                <option value="tmin">Min Temp</option>
+                <option value="rain">Rainfall</option>
+                <option value="srad">Solar Rad</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="map-date">Date</label>
+            <button class="date-nav-btn" id="date-prev" title="Previous day">&larr;</button>
+            <input type="date" id="map-date" value="2023-06-15">
+            <button class="date-nav-btn" id="date-next" title="Next day">&rarr;</button>
+        </div>
+
+        <div class="control-group">
+            <label for="map-admin-level">Admin</label>
+            <select id="map-admin-level">
+                <option value="">None</option>
+                <option value="country">Country</option>
+                <option value="admin1" selected>States</option>
+                <option value="admin2">Counties</option>
+            </select>
+        </div>
+
+        <div class="control-group">
+            <label for="map-opacity">Opacity</label>
+            <input type="range" id="map-opacity" class="opacity-slider"
+                   min="0" max="100" value="70">
+            <span class="opacity-value" id="opacity-label">70%</span>
+        </div>
+    </div>
+
+    <div id="map-container">
+        <div class="map-loading" id="map-loading">Loading tiles...</div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+            integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+            crossorigin=""></script>
+    {% load static %}
+    <script src="{% static 'dssat_agent/js/map_explorer.js' %}"></script>
+{% endblock %}

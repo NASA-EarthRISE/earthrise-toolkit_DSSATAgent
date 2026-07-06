@@ -1,0 +1,116 @@
+{% extends "shell/base.html" %}
+{% block title %}Batch Experiment - {{ agent_name }}{% endblock %}
+{% block extra_css %}
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+    <link rel="stylesheet" href="{% static 'dssat_agent/css/explorer_extras.css' %}">
+{% endblock %}
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="experiments" active_agent="dssat_agent" %}
+<div class="explorer-container">
+
+    {% if error %}
+    <div class="explorer-header">
+        <h1>Batch Not Found</h1>
+        <p class="subtitle">{{ error }}</p>
+    </div>
+    {% else %}
+
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'dssat_agent:experiment_list' %}" class="breadcrumb">&larr; Experiments</a>
+            <h1>{{ batch.label|default:"Batch Experiment" }}</h1>
+            <p class="subtitle">
+                {{ batch.crop_name }} &mdash; {{ batch.sub_experiment_type }} at {{ batch.total_locations }} locations
+                ({{ batch.location_mode }})
+            </p>
+        </div>
+        <div>
+            {% if batch.chat_url %}
+            <a href="{{ batch.chat_url }}" class="btn btn-sm btn-inline-spacing">Back to Chat</a>
+            {% endif %}
+            <span class="status-badge status-{{ batch.status }}">{{ batch.status }}</span>
+        </div>
+    </div>
+
+    <!-- Aggregate Stats -->
+    {% if batch.aggregate_summary %}
+    <div class="detail-section">
+        <h2 class="section-title">Aggregate Statistics</h2>
+        <div class="param-grid">
+            <div class="param-item">
+                <span class="param-label">Completed</span>
+                <span class="param-value">{{ batch.completed }} / {{ batch.total_locations }}</span>
+            </div>
+            {% if batch.failed > 0 %}
+            <div class="param-item">
+                <span class="param-label">Failed</span>
+                <span class="param-value param-value-fail">{{ batch.failed }}</span>
+            </div>
+            {% endif %}
+            {% with stats=batch.aggregate_summary.yield_stats %}
+            {% if stats %}
+            <div class="param-item">
+                <span class="param-label">Mean Yield</span>
+                <span class="param-value">{{ stats.mean }} kg/ha</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Median Yield</span>
+                <span class="param-value">{{ stats.median }} kg/ha</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Std Dev</span>
+                <span class="param-value">{{ stats.std }} kg/ha</span>
+            </div>
+            <div class="param-item">
+                <span class="param-label">Min / Max</span>
+                <span class="param-value">{{ stats.min }} &ndash; {{ stats.max }} kg/ha</span>
+            </div>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Per-Location Results -->
+    <div class="detail-section">
+        <h2 class="section-title">Per-Location Results ({{ children|length }})</h2>
+        {% if children %}
+        <div class="data-table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Location</th>
+                        <th>Status</th>
+                        <th>Yield (kg/ha)</th>
+                        <th>Maturity (days)</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for child in children %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ child.location_label }}</td>
+                        <td><span class="status-badge status-{{ child.status }}">{{ child.status }}</span></td>
+                        <td>{{ child.yield_kg_ha|default:"-" }}</td>
+                        <td>{{ child.maturity_days|default:"-" }}</td>
+                        <td>
+                            <a href="{% url 'dssat_agent:experiment_detail' child.experiment_id %}" class="btn-link">
+                                View &rarr;
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-state">No child experiments yet.</p>
+        {% endif %}
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+<div class="layer-form" id="layer-form">
+    <div class="form-grid cols-3">
+        <div class="form-group">
+            <label for="layer-sllb">Depth (cm)</label>
+            <input type="number" id="layer-sllb" name="sllb" step="1" class="form-input" required>
+        </div>
+        <div class="form-group">
+            <label for="layer-slcl">Clay %</label>
+            <input type="number" id="layer-slcl" name="slcl" step="0.1" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-slsi">Silt %</label>
+            <input type="number" id="layer-slsi" name="slsi" step="0.1" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-sbdm">Bulk Density</label>
+            <input type="number" id="layer-sbdm" name="sbdm" step="0.01" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-sloc">Organic Carbon</label>
+            <input type="number" id="layer-sloc" name="sloc" step="0.01" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-slll">Lower Limit (LL)</label>
+            <input type="number" id="layer-slll" name="slll" step="0.001" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-sldul">Drained Upper (DUL)</label>
+            <input type="number" id="layer-sldul" name="sldul" step="0.001" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-slsat">Saturation (SAT)</label>
+            <input type="number" id="layer-slsat" name="slsat" step="0.001" class="form-input">
+        </div>
+        <div class="form-group">
+            <label for="layer-sksat">K-Sat (KSAT)</label>
+            <input type="number" id="layer-sksat" name="sksat" step="0.1" class="form-input">
+        </div>
+    </div>
+    <div class="estimate-hint">
+        <button type="button" class="btn btn-ghost btn-sm" id="estimate-layer-btn">Auto-estimate from clay/silt</button>
+    </div>
+</div>

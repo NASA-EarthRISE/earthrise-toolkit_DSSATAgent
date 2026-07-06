@@ -1,0 +1,95 @@
+# ===========================================================================
+# Dev Dockerfile for EarthRISEAgents
+#
+# Used by `docker compose up -d --build`. Differs from prod `Dockerfile`:
+#   - Builds Python deps INTO the image (no PVC / venv-builder initContainer).
+#   - Compiles DSSATTools natively from source via gfortran, so it works on
+#     the host arch (incl. arm64 / Apple Silicon) — no `--platform` pin.
+#
+# For prod K8s images, use `Dockerfile` (amd64-pinned, PVC venv pattern).
+# ===========================================================================
+
+# ---------------------------------------------------------------------------
+# Stage: base
+# ---------------------------------------------------------------------------
+FROM python:3.11-slim-bookworm AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_NO_CACHE_DIR=1
+
+# System dependencies for all agents:
+#   gcc/g++/gfortran: DSSATTools compilation
+#   gdal-bin/libgdal-dev: DataAgent raster processing
+#   libpq-dev/postgresql-client: PostGIS access
+#   libeccodes-dev: ERA5/GRIB data
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    g++ \
+    gfortran \
+    gdal-bin \
+    libgdal-dev \
+    libpq-dev \
+    postgresql-client \
+    postgis \
+    libeccodes-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV GDAL_CONFIG=/usr/bin/gdal-config \
+    CPLUS_INCLUDE_PATH=/usr/include/gdal \
+    C_INCLUDE_PATH=/usr/include/gdal
+
+WORKDIR /app
+
+# Install Python dependencies first
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+
+# Install local DSSATTools fork AFTER requirements (overrides any PyPI version)
+COPY dssat_agent/DSSATTools/ /app/_DSSATTools/
+RUN pip install --no-cache-dir --force-reinstall /app/_DSSATTools/ && rm -rf /app/_DSSATTools/
+
+# Copy the consolidated project
+COPY manage.py .
+COPY pytest.ini .
+COPY dssat_chat_project/ dssat_chat_project/
+COPY accounts/ accounts/
+COPY earthrise_agents_base/ earthrise_agents_base/
+COPY dssat_chat_agent/ dssat_chat_agent/
+COPY data_agent/ data_agent/
+COPY dssat_agent/ dssat_agent/
+COPY knowledge_agent/ knowledge_agent/
+
+# Create working directories
+RUN mkdir -p /tmp/dataagent /tmp/simulation /app/staticfiles /app/media
+
+# Collect static files
+RUN DJANGO_SETTINGS_MODULE=dssat_chat_project.settings \
+    python manage.py collectstatic --noinput 2>/dev/null || true
+
+# ---------------------------------------------------------------------------
+# Stage: web — Django ASGI server
+# ---------------------------------------------------------------------------
+FROM base AS web
+
+COPY scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+EXPOSE 8100
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["uvicorn", "dssat_chat_project.asgi:application", "--host", "0.0.0.0", "--port", "8100"]
+
+# ---------------------------------------------------------------------------
+# Stage: celery — Celery worker with queue routing
+# ---------------------------------------------------------------------------
+FROM base AS celery
+
+COPY scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
+ENTRYPOINT ["/entrypoint.sh"]
+CMD ["celery", "-A", "dssat_chat_project", "worker", \
+     "--loglevel=info", \
+     "--concurrency=4", \
+     "-Q", "dssat_chat_project,data_agent,dssat_agent,knowledge_agent"]

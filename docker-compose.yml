@@ -1,0 +1,169 @@
+# =============================================================================
+# EarthRISEAgents — Docker Compose
+# =============================================================================
+#
+# Consolidated deployment: single Django project with all agents embedded.
+#
+# QUICK START:
+#   docker compose up -d
+#
+# WITH OLLAMA (containerized):
+#   docker compose --profile with-ollama up -d
+#
+# HOST OLLAMA (default):
+#   Expects Ollama running on the host at port 11434.
+#
+# SERVICES:
+#   postgres    — PostGIS database (shared)
+#   redis       — Celery broker + pub/sub
+#   web         — Django ASGI (chat UI + all agent APIs)
+#   celery      — Unified worker (all queues)
+#   ollama      — LLM inference (optional, use host by default)
+#
+# ENVIRONMENT:
+#   All services load config from ./config.env.
+#
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Infrastructure
+  # ---------------------------------------------------------------------------
+
+  postgres:
+    build:
+      context: ./postgres
+    platform: linux/amd64
+    container_name: earthrise-postgres
+    env_file:
+      - ./config.env
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - earthrise
+
+  redis:
+    image: redis:7-alpine
+    container_name: earthrise-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - earthrise
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: earthrise-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    entrypoint: ["/bin/sh", "-c", "ollama serve & sleep 5 && ollama pull llama3.1 && ollama pull nomic-embed-text && wait"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:11434/api/tags || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    networks:
+      - earthrise
+    profiles:
+      - with-ollama
+
+  # ---------------------------------------------------------------------------
+  # Application
+  # ---------------------------------------------------------------------------
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: web
+    container_name: earthrise-web
+    env_file:
+      - ./config.env
+    environment:
+      DBHOST: postgres
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      OLLAMA_URL: http://host.docker.internal:11434
+      # Dev backfill window: first 10 days of 2024. Production (K8s)
+      # leaves these unset so fetch_all_time_series uses its defaults
+      # (2024-01-01 → today).
+      STARTUP_FETCH_START: "2024-01-01"
+      STARTUP_FETCH_END: "2024-01-10"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8100:8100"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - dataagent_working:/tmp/dataagent
+      - staticfiles:/app/staticfiles
+      # Bind-mount the knowledge documents so the RAG corpus is editable on
+      # the host without a rebuild (the corpus is .dockerignored, never baked).
+      # The in-container path matches dssat_chat_agent/apps.py's documents-dir
+      # default, so no KNOWLEDGE_DOCUMENTS_DIR override is needed. In prod the
+      # same path is provided by the PVC at $KNOWLEDGE_DOCUMENTS_DIR.
+      - ./dssat_chat_agent/data/documents:/app/dssat_chat_agent/data/documents
+      # Bind-mount reference_rasters so first-boot auto-downloads (e.g.
+      # the SE-US SRTM clip) survive ``docker compose up --build``.
+      # Without this the file lives only in the container's writable
+      # layer and gets wiped on every rebuild — forcing a fresh download
+      # + raster2pgsql ingest each time.
+      - ./dssat_agent/data/reference_rasters:/app/dssat_agent/data/reference_rasters
+    networks:
+      - earthrise
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+      target: celery
+    container_name: earthrise-celery
+    env_file:
+      - ./config.env
+    environment:
+      DBHOST: postgres
+      CELERY_BROKER_URL: redis://redis:6379/0
+      CELERY_RESULT_BACKEND: redis://redis:6379/0
+      OLLAMA_URL: http://host.docker.internal:11434
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - dataagent_working:/tmp/dataagent
+      - ./dssat_chat_agent/data/documents:/app/dssat_chat_agent/data/documents
+    networks:
+      - earthrise
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+  dataagent_working:
+  staticfiles:
+
+networks:
+  earthrise:
+    driver: bridge

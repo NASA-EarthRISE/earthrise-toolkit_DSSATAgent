@@ -1,0 +1,86 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}Knowledge — Documents{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'knowledge_agent/css/knowledge.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'knowledge_agent/js/documents.js' %}"></script>
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="documents" active_agent="knowledge_agent" %}
+
+<div class="explorer-container">
+    <!-- Header -->
+    <div class="explorer-header">
+        <div>
+            <a href="{% url 'knowledge_agent:explorer_index' %}" class="breadcrumb">Strategies</a>
+            <h1>Ingested Documents</h1>
+            <p class="subtitle">
+                {{ total_sources }} source{{ total_sources|pluralize }} &middot;
+                {{ total_chunks }} chunk{{ total_chunks|pluralize }} total
+            </p>
+        </div>
+    </div>
+
+    {% if not categories %}
+    <div class="empty-state">
+        <div class="empty-icon">&#128218;</div>
+        <h3>No documents ingested yet</h3>
+        <p>Run the ingestion pipeline from the
+           <a href="{% url 'knowledge_agent:explorer_index' %}">Strategies</a> page
+           to download and process documents.</p>
+    </div>
+    {% endif %}
+
+    <!-- Category tabs -->
+    {% if categories|length > 1 %}
+    <div class="tab-bar" id="category-tabs">
+        <button class="tab active" data-tab="all">All</button>
+        {% for cat in categories %}
+        <button class="tab" data-tab="{{ cat.key }}">
+            {{ cat.label }}
+            <span class="tab-count">{{ cat.sources|length }}</span>
+        </button>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Source cards grouped by category -->
+    {% for cat in categories %}
+    <div class="category-section" data-category="{{ cat.key }}">
+        <div class="category-header">
+            <h2>{{ cat.label }}</h2>
+            <span class="category-stat">{{ cat.total_chunks }} chunk{{ cat.total_chunks|pluralize }}</span>
+        </div>
+        <div class="source-grid">
+            {% for src in cat.sources %}
+            <a href="{% url 'knowledge_agent:explorer_source_detail' source_slug=src.slug %}"
+               class="source-card">
+                <div class="source-card-top">
+                    <span class="source-type-badge source-type-{{ src.category }}">
+                        {{ src.category_label }}
+                    </span>
+                    <span class="source-chunk-count">{{ src.chunk_count }} chunks</span>
+                </div>
+                <h3 class="source-title">{{ src.title }}</h3>
+                <div class="source-meta">
+                    <span class="mono">{{ src.slug }}</span>
+                </div>
+                {% if src.last_ingested %}
+                <div class="source-date">Last ingested: {{ src.last_ingested|truncatewords:1 }}</div>
+                {% endif %}
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

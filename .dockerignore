@@ -1,0 +1,79 @@
+# =============================================================================
+# Build context exclusions
+# =============================================================================
+# Anything that is NOT needed to build or run the image at runtime should be
+# listed here. Files matched are not sent to the Docker daemon, so they can
+# never leak into a layer even if a future COPY widens its scope.
+
+# --- VCS / editor / OS noise -------------------------------------------------
+.git
+.gitignore
+.gitattributes
+**/.DS_Store
+**/__pycache__
+**/*.pyc
+**/*.pyo
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+.venv
+venv
+env
+
+# --- Local dev / docs / scratch ---------------------------------------------
+docs
+documentation
+Deployment
+*.rtf
+*.md
+# Re-include runtime-required markdown that the global *.md rule would drop:
+#  - every app's SKILL.md (read by the skill loader at runtime)
+#  - the vendored fork's README.md (setup.py reads it for long_description at
+#    install; excluding it breaks the DSSATTools pip install — see note below)
+!**/skills/**/*.md
+!dssat_agent/DSSATTools/README.md
+
+# --- Top-level test data (850 MB on disk, never used in image) --------------
+data
+
+# --- DSSAT documentation corpus (560 MB) ------------------------------------
+# Uploaded directly to the PVC at $DSSAT_DOCS_DIR; not baked into the image.
+dssat_agent/data/docs
+
+# --- Knowledge RAG corpus (285 MB) ------------------------------------------
+# Provided at runtime via bind-mount (dev) / PVC at $KNOWLEDGE_DOCUMENTS_DIR
+# (prod); never baked into the image. See deployment docs.
+dssat_chat_agent/data/documents
+
+# --- DSSATTools cruft -------------------------------------------------------
+# We keep the Linux binary (dscsm048) and dssat-csm-os/Data (genotype/code
+# tables required at runtime). Everything else is build-only or unused.
+dssat_agent/DSSATTools/DSSATTools/bin/dscsm048.exe
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/cmake
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/CMakeLists.txt
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/distclean.cmake
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/CSM_Main
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/InputModule
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Management
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Plant
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Resources
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Soil
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/SPAM
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Utilities
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/Weather
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/*.md
+dssat_agent/DSSATTools/DSSATTools/dssat-csm-os/license.txt
+dssat_agent/DSSATTools/tests
+dssat_agent/DSSATTools/docs
+dssat_agent/DSSATTools/wth_test
+dssat_agent/DSSATTools/crop_test
+# NOTE: do NOT exclude DSSATTools/README.md or DSSATTools/LICENSE —
+# setup.py reads README.md at install time for long_description, and
+# setuptools wheel-metadata picks up LICENSE. Excluding them breaks the
+# pip install of the local DSSATTools fork.
+
+# --- Compose / CI / local config --------------------------------------------
+docker-compose*.yml
+.dockerignore
+.github
+.gitlab-ci.yml

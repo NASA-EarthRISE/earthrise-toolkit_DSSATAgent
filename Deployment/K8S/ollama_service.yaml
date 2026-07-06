@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    k8s-app: earthrise-agent-service
+  name: earthrise-agent-service
+spec:
+  ports:
+  - name: webapp
+    port: 80
+    protocol: TCP
+    targetPort: 8000
+  - name: mcp
+    port: 9000
+    protocol: TCP
+    targetPort: 9000
+  selector:
+    k8s-app: earthrise-agent
+  type: ClusterIP
+
+  

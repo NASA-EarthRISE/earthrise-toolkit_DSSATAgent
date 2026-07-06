@@ -1,0 +1,578 @@
+/* PR 2.10 — styling for tabs, graph viz, RAPTOR tree, and ontology pane.
+   Designed to compose with the existing explorer.css / knowledge.css. */
+
+/* ===================================================================
+   Tabs (per-doc page)
+   =================================================================== */
+
+.strategy-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 1.5rem;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.tab-btn {
+    background: transparent;
+    border: none;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.15s, border-color 0.15s;
+}
+
+.tab-btn:hover {
+    color: #1f2937;
+}
+
+.tab-btn.active {
+    color: #1976d2;
+    border-bottom-color: #1976d2;
+    font-weight: 600;
+}
+
+.tab-panel {
+    display: none;
+    padding-top: 1.5rem;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+.tab-loading {
+    padding: 2rem;
+    color: #6b7280;
+    text-align: center;
+    font-style: italic;
+}
+
+.tab-error {
+    padding: 1rem;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    color: #991b1b;
+    border-radius: 6px;
+}
+
+/* ===================================================================
+   Contextual chunks
+   =================================================================== */
+
+.contextual-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.contextual-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 0.75rem;
+}
+
+.contextual-prefix pre {
+    background: #f0f9ff;
+    border-left: 3px solid #1976d2;
+    padding: 0.5rem 0.75rem;
+    margin: 0.25rem 0;
+    white-space: pre-wrap;
+    font-size: 0.85rem;
+}
+
+.contextual-card details {
+    margin-top: 0.5rem;
+}
+
+.contextual-card summary {
+    cursor: pointer;
+    color: #1976d2;
+    font-size: 0.85rem;
+}
+
+/* ===================================================================
+   Parent / child tree
+   =================================================================== */
+
+.pc-parent {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.pc-parent summary {
+    cursor: pointer;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.pc-parent-content {
+    background: #fef9c3;
+    margin: 0.5rem 0;
+    padding: 0.5rem;
+    border-left: 3px solid #ca8a04;
+}
+
+.pc-child {
+    margin-left: 1.5rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: #f9fafb;
+    border-left: 2px solid #d1d5db;
+    border-radius: 4px;
+}
+
+.pc-child summary {
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+/* ===================================================================
+   Graph (cytoscape) + filter chips
+   =================================================================== */
+
+.graph-canvas {
+    width: 100%;
+    height: 600px;
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    position: relative;
+}
+
+.graph-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    margin-bottom: 0.75rem;
+}
+
+.filter-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.filter-chip {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 16px;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: opacity 0.15s;
+    opacity: 0.4;
+}
+
+.filter-chip.active {
+    opacity: 1;
+}
+
+.filter-chip .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.filter-chip .ct {
+    color: #6b7280;
+    font-size: 0.7rem;
+}
+
+.depth-input {
+    width: 4rem;
+    padding: 0.25rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.graph-stats, .raptor-stats {
+    color: #6b7280;
+    font-size: 0.85rem;
+    margin-left: auto;
+}
+
+.graph-detail, .raptor-detail {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+}
+
+.graph-detail h4, .raptor-detail h4 {
+    margin: 0 0 0.5rem 0;
+    color: #4b5563;
+    font-size: 0.9rem;
+}
+
+.entity-detail .entity-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.entity-detail .entity-type {
+    color: #6b7280;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.entity-detail .entity-type .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.entity-detail .entity-desc {
+    background: #f9fafb;
+    padding: 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+}
+
+.entity-detail .entity-refs {
+    color: #6b7280;
+    font-size: 0.8rem;
+    margin: 0.5rem 0;
+}
+
+.entity-sources-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.entity-sources-list li {
+    padding: 0.25rem 0;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.entity-sources-list a {
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.entity-sources-list a:hover {
+    text-decoration: underline;
+}
+
+/* ===================================================================
+   RAPTOR tree
+   =================================================================== */
+
+.raptor-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.raptor-tree {
+    padding: 0.5rem;
+    background: #fafafa;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    min-height: 200px;
+    overflow: auto;
+}
+
+.raptor-node-wrap {
+    margin-top: 0.25rem;
+}
+
+.raptor-node {
+    background: #fff;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s;
+}
+
+.raptor-node.raptor-leaf {
+    background: #fef9c3;
+    border-color: #facc15;
+}
+
+.raptor-node.raptor-summary {
+    background: #e0f2fe;
+    border-color: #38bdf8;
+}
+
+.raptor-node.raptor-source-leaf {
+    box-shadow: 0 0 0 2px #2563eb;
+}
+
+.raptor-node:hover {
+    border-color: #1976d2;
+}
+
+.raptor-node-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.raptor-level-tag {
+    background: #1976d2;
+    color: #fff;
+    padding: 0.1rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    min-width: 1.75rem;
+    text-align: center;
+}
+
+.raptor-preview {
+    flex: 1;
+    color: #1f2937;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.raptor-children-count {
+    color: #6b7280;
+    font-size: 0.75rem;
+    white-space: nowrap;
+}
+
+.raptor-children {
+    margin-left: 1.5rem;
+    padding-left: 0.5rem;
+    border-left: 2px dashed #d1d5db;
+    display: none;
+}
+
+.raptor-node-wrap.expanded > .raptor-children {
+    display: block;
+}
+
+.raptor-node-detail pre {
+    background: #f3f4f6;
+    padding: 0.5rem;
+    margin: 0.25rem 0;
+    white-space: pre-wrap;
+    font-size: 0.85rem;
+}
+
+/* ===================================================================
+   Ontology pane
+   =================================================================== */
+
+.ontology-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.ontology-schema-pane,
+.ontology-source-pane,
+.ontology-individuals-pane {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.ontology-grid h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.ontology-grid h4 .hint {
+    color: #6b7280;
+    font-weight: 400;
+    font-size: 0.8rem;
+}
+
+.ontology-schema dt {
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 0.5rem;
+}
+
+.ontology-schema dd {
+    margin: 0.25rem 0 0.75rem 0;
+}
+
+.onto-token {
+    display: inline-block;
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 0.1rem 0.65rem;
+    font-size: 0.8rem;
+    color: #1f2937;
+    margin: 0.15rem 0.15rem;
+}
+
+.onto-token.onto-data {
+    background: #f0fdf4;
+    color: #166534;
+}
+
+.onto-typings {
+    margin: 0;
+    padding-left: 1rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.ontology-contribution dt {
+    font-weight: 600;
+    color: #4b5563;
+    margin-top: 0.5rem;
+}
+
+.ontology-contribution dd {
+    margin: 0.25rem 0 0.75rem 0;
+}
+
+.onto-class-group {
+    margin-bottom: 1rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid #f3f4f6;
+}
+
+.onto-class-group:last-child { border-bottom: none; }
+
+.onto-class-group h4 {
+    margin: 0 0 0.25rem 0;
+}
+
+.onto-individuals {
+    list-style: none;
+    padding-left: 0;
+    margin: 0.25rem 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+}
+
+.onto-individuals li {
+    background: #f9fafb;
+    border-radius: 4px;
+    padding: 0.15rem 0.5rem;
+    font-size: 0.8rem;
+}
+
+.onto-individuals li.more { color: #6b7280; font-style: italic; }
+
+.ontology-stats { margin: 0.5rem 0 1rem 0; color: #4b5563; }
+
+/* ===================================================================
+   Query composer
+   =================================================================== */
+
+.query-composer {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.query-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.query-input {
+    flex: 1;
+    min-width: 220px;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.query-strategy-select {
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    background: #fff;
+    font-size: 0.85rem;
+}
+
+.query-topk {
+    width: 4.5rem;
+    padding: 0.5rem 0.5rem;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+}
+
+.query-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: #4b5563;
+}
+
+.query-result-card {
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.result-rank {
+    color: #1976d2;
+    font-weight: 600;
+    font-size: 0.85rem;
+}
+
+.result-score {
+    color: #6b7280;
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+/* ===================================================================
+   Inspect (corpus pages) shared
+   =================================================================== */
+
+.inspect-page {
+    margin-top: 1.5rem;
+}
+
+.btn.btn-outline {
+    background: transparent;
+    border: 1px solid #1976d2;
+    color: #1976d2;
+}
+
+.btn.btn-outline:hover {
+    background: #e0f2fe;
+}

@@ -1,0 +1,214 @@
+{% comment %}
+Shared tab layout for DSSAT Preferences + DSSAT System Config.
+Context requirements: is_system (bool), all config values from _page_context(),
+soil_profiles, *_codes lists.
+{% endcomment %}
+
+<!-- Tab bar -->
+<div class="mgmt-tabs">
+    <button class="mgmt-tab active" data-tab="general">General</button>
+    <button class="mgmt-tab" data-tab="sim-options">Simulation Options</button>
+    <button class="mgmt-tab" data-tab="fallbacks">Management Fallbacks</button>
+    <button class="mgmt-tab" data-tab="crops">{% if is_system %}System Per-Crop Defaults{% else %}My Crops{% endif %}</button>
+    {% if is_system %}
+    <button class="mgmt-tab" data-tab="curated">Curated Dropdowns</button>
+    {% endif %}
+</div>
+
+<!-- =========================================================================
+     Tab 1: General Preferences
+========================================================================= -->
+<div class="tab-panel active" id="tab-general">
+    <div class="mgmt-card">
+        <h2>General</h2>
+        <form class="mgmt-form" data-config-section="preferences">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_default_weather_source">Default Weather Source</label>
+                    <select name="default_weather_source" id="id_default_weather_source">
+                        <option value="power"       {% if default_weather_source == 'power' %}selected{% endif %}>NASA POWER</option>
+                        <option value="era5"        {% if default_weather_source == 'era5' %}selected{% endif %}>ERA5</option>
+                        <option value="agera5"      {% if default_weather_source == 'agera5' %}selected{% endif %}>AgERA5</option>
+                        <option value="chirps"      {% if default_weather_source == 'chirps' %}selected{% endif %}>CHIRPS (rain only)</option>
+                        <option value="chirts"      {% if default_weather_source == 'chirts' %}selected{% endif %}>CHIRTS (temp only)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_default_num_years">Default Simulation Years</label>
+                    <input type="number" name="default_num_years" id="id_default_num_years" min="1" max="30" value="{{ default_num_years }}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="id_default_soil_id">Default Soil Profile</label>
+                <select name="default_soil_id" id="id_default_soil_id">
+                    <option value="">(auto-select at runtime based on location)</option>
+                    {% for s in soil_profiles %}
+                    <option value="{{ s.soil_id }}" {% if default_soil_id == s.soil_id %}selected{% endif %}>
+                        {{ s.soil_id }}{% if s.name %} — {{ s.name }}{% endif %} [{{ s.source }}]
+                    </option>
+                    {% endfor %}
+                </select>
+                <span class="helptext">If unset, the system auto-selects a soil profile at experiment runtime based on the simulation location.</span>
+            </div>
+            <button type="submit" class="btn-primary">Save General Preferences</button>
+        </form>
+    </div>
+</div>
+
+<!-- =========================================================================
+     Tab 2: Simulation Options
+========================================================================= -->
+<div class="tab-panel" id="tab-sim-options">
+    <div class="mgmt-card">
+        <h2>Simulation Balances</h2>
+        <form class="mgmt-form" data-config-section="sim-options">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_sim_water">Water Balance</label>
+                    <select name="sim_water" id="id_sim_water">
+                        <option value="Y" {% if sim_water == 'Y' %}selected{% endif %}>Y (enabled)</option>
+                        <option value="N" {% if sim_water == 'N' %}selected{% endif %}>N (disabled)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_sim_nitro">Nitrogen Balance</label>
+                    <select name="sim_nitro" id="id_sim_nitro">
+                        <option value="Y" {% if sim_nitro == 'Y' %}selected{% endif %}>Y (enabled)</option>
+                        <option value="N" {% if sim_nitro == 'N' %}selected{% endif %}>N (disabled)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_sim_phosphorus">Phosphorus Balance</label>
+                    <select name="sim_phosphorus" id="id_sim_phosphorus">
+                        <option value="Y" {% if sim_phosphorus == 'Y' %}selected{% endif %}>Y (enabled)</option>
+                        <option value="N" {% if sim_phosphorus == 'N' %}selected{% endif %}>N (disabled)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_sim_potassium">Potassium Balance</label>
+                    <select name="sim_potassium" id="id_sim_potassium">
+                        <option value="Y" {% if sim_potassium == 'Y' %}selected{% endif %}>Y (enabled)</option>
+                        <option value="N" {% if sim_potassium == 'N' %}selected{% endif %}>N (disabled)</option>
+                    </select>
+                </div>
+            </div>
+
+            <h3 class="section-subheader">Output Verbosity</h3>
+            <div class="form-grid-4">
+                <div class="form-group">
+                    <label for="id_output_grout">Growth (grout)</label>
+                    <select name="output_grout" id="id_output_grout">
+                        <option value="Y" {% if output_grout == 'Y' %}selected{% endif %}>Y</option>
+                        <option value="N" {% if output_grout == 'N' %}selected{% endif %}>N</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_output_caout">Crop Age (caout)</label>
+                    <select name="output_caout" id="id_output_caout">
+                        <option value="Y" {% if output_caout == 'Y' %}selected{% endif %}>Y</option>
+                        <option value="N" {% if output_caout == 'N' %}selected{% endif %}>N</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_output_waout">Water (waout)</label>
+                    <select name="output_waout" id="id_output_waout">
+                        <option value="Y" {% if output_waout == 'Y' %}selected{% endif %}>Y</option>
+                        <option value="N" {% if output_waout == 'N' %}selected{% endif %}>N</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_output_niout">Nitrogen (niout)</label>
+                    <select name="output_niout" id="id_output_niout">
+                        <option value="Y" {% if output_niout == 'Y' %}selected{% endif %}>Y</option>
+                        <option value="N" {% if output_niout == 'N' %}selected{% endif %}>N</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_output_miout">Mineral (miout)</label>
+                    <select name="output_miout" id="id_output_miout">
+                        <option value="Y" {% if output_miout == 'Y' %}selected{% endif %}>Y</option>
+                        <option value="N" {% if output_miout == 'N' %}selected{% endif %}>N</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="id_output_diout">Disease (diout)</label>
+                    <select name="output_diout" id="id_output_diout">
+                        <option value="Y" {% if output_diout == 'Y' %}selected{% endif %}>Y</option>
+                        <option value="N" {% if output_diout == 'N' %}selected{% endif %}>N</option>
+                    </select>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-primary">Save Simulation Options</button>
+        </form>
+    </div>
+</div>
+
+<!-- =========================================================================
+     Tab 3: Management Fallbacks — populated by JS with the shared
+     Management Practices widget. Users can configure a full default
+     schedule (multiple events) per management practice.
+========================================================================= -->
+<div class="tab-panel" id="tab-fallbacks">
+    <div class="mgmt-card">
+        <h2>Management Practice Fallbacks</h2>
+        <p class="mgmt-card-note spaced">
+            These defaults are applied to simulations that don't specify
+            management events (and for which no per-crop default exists).
+            Configure a full event schedule per practice, or leave empty.
+        </p>
+
+        <div id="fallbacks-root" class="mp-widget-slot"></div>
+
+        <div class="mgmt-card-actions">
+            <button type="button" id="btn-save-fallbacks" class="btn-primary">Save Management Fallbacks</button>
+        </div>
+        <div class="save-banner" id="fallbacks-banner"></div>
+    </div>
+</div>
+
+<!-- =========================================================================
+     Tab 4: My Crops / System Per-Crop Defaults
+========================================================================= -->
+<div class="tab-panel" id="tab-crops">
+    <div class="mgmt-card">
+        <div class="mgmt-card-head">
+            <h2>Per-Crop Defaults</h2>
+            <button type="button" id="btn-add-crop" class="btn-primary btn-sm">+ Add Crop</button>
+        </div>
+        <p class="mgmt-card-note">
+            Configure defaults that apply when running experiments for a specific crop.
+        </p>
+
+        <div id="crop-cards-container">
+            <!-- Populated by config_preferences.js on page load -->
+        </div>
+
+        <p class="mgmt-empty is-hidden" id="no-crops-message">
+            No crops configured yet. Click "+ Add Crop" to add defaults for a crop.
+        </p>
+    </div>
+</div>
+
+<!-- =========================================================================
+     Tab 5: Curated Wizard Dropdowns (admin only)
+========================================================================= -->
+{% if is_system %}
+<div class="tab-panel" id="tab-curated">
+    <div class="mgmt-card">
+        <div class="mgmt-card-head">
+            <h2>Curated Wizard Dropdowns</h2>
+            <button type="button" id="btn-add-curated-crop" class="btn-primary btn-sm">+ Add Crop</button>
+        </div>
+        <p class="mgmt-card-note">
+            Curate which DSSAT codes appear in the experiment wizard's dropdowns per crop.
+            Leaving a category empty means all codes for that category are available.
+            Users can opt out per-dropdown in the wizard to see all codes.
+        </p>
+
+        <div id="curated-cards-container">
+            <!-- Populated by config_system.js -->
+        </div>
+    </div>
+</div>
+{% endif %}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ agent_name }}{% endblock %}</title>
+    {% load static %}
+    {# Deployment subpath prefix ("/subpath" or "") — prepend to all absolute URLs in JS. #}
+    <script>window.SUBPATH = "{{ subpath_prefix|default:'' }}";</script>
+
+    {% comment %}
+        Per-agent accent colors + icons for the chat UI (tool-trace rows),
+        assembled from each sub-agent's AppConfig by the agent_visuals context
+        processor — no colors/icons are hardcoded in templates or JS.
+    {% endcomment %}
+    <script>window.AGENT_VISUALS = {{ agent_visuals_json|safe }};</script>
+
+    {% comment %}
+        Additional product-injected JS globals in <head>. Empty by default;
+        a product shell fills it only if it needs page-level globals.
+    {% endcomment %}
+    {% block head_globals %}{% endblock %}
+
+    {# NASA Horizon Design System fonts — Inter (headings) + Public Sans (body). #}
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&family=Public+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+
+    {% comment %}
+        OverlayScrollbars — custom cross-browser scrollbars that overlay
+        content instead of reserving layout space. Styled by chat.css to
+        match the dark theme.
+    {% endcomment %}
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/styles/overlayscrollbars.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/overlayscrollbars@2.10.1/browser/overlayscrollbars.browser.es5.min.js" defer></script>
+
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/tokens.css' %}">
+    <link rel="stylesheet" href="{% static 'earthrise_agents_base/css/chat.css' %}">
+    {% comment %}
+        Product-specific stylesheets or design tokens go here. Products
+        override this block to inject their branded CSS on top of the
+        framework's defaults.
+    {% endcomment %}
+    {% block product_css %}{% endblock %}
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    {% block body %}{% endblock %}
+
+    {% block sitewide_feedback %}
+        {% include "earthrise_agents_base/partials/feedback_widget.html" %}
+    {% endblock %}
+
+    {% comment %}
+        Product-specific footer content. Empty by default; products
+        fill this in with their branding line (e.g. "Powered by Acme").
+    {% endcomment %}
+    {% block branding_footer %}{% endblock %}
+
+    {% block extra_js %}{% endblock %}
+
+    {% comment %}
+        Initialise OverlayScrollbars on body for every page EXCEPT the
+        chat page (which locks body to 100vh + overflow:hidden and
+        scrolls its own internal panels).
+    {% endcomment %}
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            if (document.body.classList.contains('chat-page')) return;
+            if (typeof OverlayScrollbarsGlobal === 'undefined') return;
+            const { OverlayScrollbars } = OverlayScrollbarsGlobal;
+            OverlayScrollbars(
+                { target: document.body, cancel: { body: false } },
+                {
+                    scrollbars: {
+                        theme: 'os-theme-chatagent',
+                        autoHide: 'leave',
+                        autoHideDelay: 800,
+                    },
+                }
+            );
+        });
+    </script>
+</body>
+</html>

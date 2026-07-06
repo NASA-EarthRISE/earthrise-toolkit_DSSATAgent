@@ -1,0 +1,67 @@
+/* ===================================
+   NASA Horizon Design System — Design Tokens
+   Single source of truth for the whole design system. Every stylesheet
+   across every app consumes these via var(--…). Loaded BEFORE all other
+   sheets (see the shell skeleton + the standalone chat page) so tokens
+   resolve everywhere. The product token-override sheet is loaded via the
+   product_css block and wins the cascade.
+   See earthrise_agents_base/documentation/horizon-design-system.md for the
+   full reference.
+   ================================== */
+
+/* CSS Custom Properties */
+:root {
+    /* Horizon color tokens */
+    --color-primary:   #0170B9;   /* links, borders, chart lines, accents */
+    --color-action:    #1c67e3;   /* secondary accents, interactive blue */
+    --color-hover:     #f64137;   /* button hover, data points, alerts */
+    --color-dark:      #2e2e32;   /* header, modal headers, timeline bar */
+    --color-text:      #3a3a3a;   /* default body text */
+    --color-text-meta: #58585b;   /* labels, subtitles, muted text */
+    --color-bg:        #F5F5F5;   /* page background */
+    --color-surface:   #FFFFFF;   /* cards, panels, modal bodies */
+    --color-border:    #dddddd;   /* dividers, input borders */
+    --color-focus:     #444447;   /* dotted focus rings */
+
+    /* Semantic status colors (not part of the Horizon brand palette; named
+       here so status text/badges stop hardcoding hexes). */
+    --color-success:   #15803d;   /* success text, "recommended"/ok badges */
+    --color-warning:   #8a6d0b;   /* caution/warning text */
+    --color-error:     var(--color-hover);  /* error text (#f64137) */
+
+    /* Muted body text alias + subtle row/cell hover surface. Named so
+       consumers stop relying on inline var() fallbacks. */
+    --color-text-muted:    var(--color-text-meta);
+    --color-surface-hover: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
+    --radius:          4px;
+    --shadow-card:     0px 0px 4px 0 rgba(0, 0, 0, 0.34);
+    --shadow-menu:     0px 4px 10px -2px rgba(0, 0, 0, 0.1);
+    --container:       1200px;
+    --font-body:       'Public Sans', sans-serif;
+    --font-heading:    'Inter', sans-serif;
+
+    /* Compatibility aliases — map the --primary-* variable names onto the
+       Horizon design tokens so var() references across every stylesheet
+       resolve to the theme colors. */
+    --primary-color:        var(--color-primary);
+    --primary-hover:        var(--color-action);
+    --secondary-color:      var(--color-action);
+    --text-primary:         var(--color-text);
+    --text-secondary:       var(--color-text-meta);
+    --text-muted:           var(--color-text-meta);
+    --glass-bg:             var(--color-surface);
+    --glass-border:         var(--color-border);
+    --card-bg:              var(--color-surface);
+    --bg-gradient-start:    var(--color-bg);
+    --bg-gradient-end:      var(--color-bg);
+    --message-user-bg:      var(--color-primary);
+    --message-assistant-bg: var(--color-surface);
+
+    --sidebar-width: 260px;
+    --sidebar-rail: 48px;
+    --header-height: 60px;
+}
+
+@media (max-width: 768px) {
+    :root { --sidebar-width: 280px; }
+}

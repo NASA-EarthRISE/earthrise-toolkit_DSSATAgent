@@ -1,0 +1,116 @@
+{% extends "shell/base.html" %}
+{% load static %}
+
+{% block title %}My Account{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/explorer.css' %}">
+<link rel="stylesheet" href="{% static 'earthrise_agents_base/css/management.css' %}">
+{% endblock %}
+
+{% block body_class %}explorer-page{% endblock %}
+
+{% block body %}
+{% include "earthrise_agents_base/partials/nav.html" with active_nav="user" %}
+
+<div class="mgmt-container">
+    <div class="mgmt-header">
+        <h1>My Account</h1>
+        <p class="subtitle">Manage your profile and preferences</p>
+    </div>
+
+    <div class="mgmt-card">
+        <h2>Profile Information</h2>
+        <form method="post" class="mgmt-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_first_name">First Name</label>
+                    <input type="text" name="first_name" id="id_first_name"
+                           value="{{ form.first_name.value|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_last_name">Last Name</label>
+                    <input type="text" name="last_name" id="id_last_name"
+                           value="{{ form.last_name.value|default:'' }}" required>
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    <input type="email" name="email" id="id_email"
+                           value="{{ form.email.value|default:'' }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="id_organization">Organization</label>
+                    <input type="text" name="organization" id="id_organization"
+                           value="{{ form.organization.value|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_title">Job Title</label>
+                    <input type="text" name="title" id="id_title"
+                           value="{{ form.title.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_phone">Phone</label>
+                    <input type="text" name="phone" id="id_phone"
+                           value="{{ form.phone.value|default:'' }}">
+                </div>
+            </div>
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="id_country">Country</label>
+                    <input type="text" name="country" id="id_country"
+                           value="{{ form.country.value|default:'' }}">
+                </div>
+                <div class="form-group">
+                    <label for="id_preferred_language">Preferred Language</label>
+                    <input type="text" name="preferred_language" id="id_preferred_language"
+                           value="{{ form.preferred_language.value|default:'en' }}"
+                           placeholder="en">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="id_areas_of_interest">Areas of Interest</label>
+                <textarea name="areas_of_interest" id="id_areas_of_interest" rows="2"
+                          placeholder="Topics, regions, specializations">{{ form.areas_of_interest.value|default:'' }}</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="id_bio">Bio</label>
+                <textarea name="bio" id="id_bio" rows="3">{{ form.bio.value|default:'' }}</textarea>
+            </div>
+
+            <button type="submit" class="btn-primary">Save Changes</button>
+        </form>
+    </div>
+
+    <div class="mgmt-card">
+        <h2>Roles</h2>
+        {% if user_groups %}
+        <div class="role-tags">
+            {% for group in user_groups %}
+            <span class="role-tag">{{ group }}</span>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="mgmt-empty">No roles assigned. Contact an administrator.</p>
+        {% endif %}
+    </div>
+
+    <div class="mgmt-card">
+        <h2>Change Password</h2>
+        <p class="mgmt-note">
+            Use the password reset flow to change your password.
+        </p>
+        <a href="{% url 'accounts:password_reset' %}" class="btn-sm">Reset Password</a>
+    </div>
+</div>
+{% endblock %}
