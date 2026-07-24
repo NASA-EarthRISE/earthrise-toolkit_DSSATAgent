@@ -199,7 +199,7 @@
     font-size: 0.75rem;
     font-weight: 600;
     background: color-mix(in srgb, var(--color-primary) 12%, transparent);
-    color: var(--primary-color);
+    color: var(--color-primary-on-tint);
     border: 1px solid color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
@@ -228,7 +228,7 @@
     border-radius: 0.375rem;
     font-size: 0.7rem;
     font-weight: 500;
-    color: var(--color-action);
+    color: var(--color-action-on-tint);
     white-space: nowrap;
 }
 

@@ -1185,12 +1185,8 @@ html::-webkit-scrollbar { display: none; }
 .nav-brand {
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--text-primary);
+    color: var(--color-on-dark);
     text-decoration: none;
-    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
 }
 
 .nav-links {
@@ -1319,10 +1315,10 @@ html::-webkit-scrollbar { display: none; }
     align-items: center;
     gap: 0.35rem;
     padding: 0.35rem 0.7rem;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--color-on-dark-surface);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: var(--radius);
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--color-on-dark-muted);
     font-size: 0.82rem;
     font-weight: 500;
     cursor: pointer;
@@ -1333,14 +1329,28 @@ html::-webkit-scrollbar { display: none; }
 .nav-user-toggle.active,
 .nav-user-dropdown:hover .nav-user-toggle,
 .nav-user-dropdown:focus-within .nav-user-toggle {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.14);
+    color: var(--color-on-dark);
+    background: var(--color-on-dark-surface-hover);
     border-color: rgba(255, 255, 255, 0.35);
 }
 .nav-user-name { white-space: nowrap; }
+/* Decorative dropdown caret. Drawn as a CSS border-triangle rather than a
+   "▾" text glyph: the glyph is a non-BMP symbol character that automated
+   contrast checkers cannot evaluate (they report it as "needs review",
+   which strict runners escalate to an error). font-size:0 collapses the
+   literal "▾" text node in the markup so only the border-triangle shows.
+   The triangle uses currentColor, inheriting the toggle's compliant text
+   color in every context (dark nav and light home pill). */
 .nav-user-caret {
-    font-size: 0.72rem;
-    opacity: 0.7;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    font-size: 0;
+    line-height: 0;
+    border-left: 4px solid transparent;
+    border-right: 4px solid transparent;
+    border-top: 5px solid currentColor;
+    opacity: 1;
     transition: transform 0.18s ease;
 }
 .nav-user-dropdown:hover .nav-user-caret,

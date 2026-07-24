@@ -80,6 +80,15 @@
     color-scheme: light;
 }
 
+/* Placeholder text must clear 4.5:1 on the --color-bg field background;
+   the browser default (~54% opacity) fails, so pin it to the Horizon
+   meta-text token, which passes on #F5F5F5. */
+.mgmt-form input::placeholder,
+.mgmt-form textarea::placeholder {
+    color: var(--color-text-meta);
+    opacity: 1;
+}
+
 .mgmt-form input:focus,
 .mgmt-form textarea:focus,
 .mgmt-form select:focus {
@@ -143,13 +152,13 @@
     background: color-mix(in srgb, var(--color-primary) 12%, transparent);
     border-radius: var(--radius);
     font-size: 0.8rem;
-    color: var(--color-primary);
+    color: var(--color-primary-on-tint);
 }
 /* Superuser role gets a distinct (warm) accent so it stands out from
  * the regular blue permission groups — makes admins easy to spot. */
 .role-tag.role-tag-superuser {
     background: rgba(245, 158, 11, 0.15);
-    color: #b45309;
+    color: var(--color-warning-on-tint);
     font-weight: 600;
 }
 
@@ -190,17 +199,17 @@
 
 .status-pending {
     background: rgba(234, 179, 8, 0.15);
-    color: #a16207;
+    color: var(--color-warning-on-tint);
 }
 
 .status-active {
     background: rgba(34, 197, 94, 0.15);
-    color: var(--color-success);
+    color: var(--color-success-on-tint);
 }
 
 .status-inactive {
     background: color-mix(in srgb, var(--color-hover) 12%, transparent);
-    color: var(--color-hover);
+    color: var(--color-error-on-tint);
 }
 
 /* Action buttons */

@@ -48,7 +48,7 @@
     <!-- Active strategy selector -->
     <div class="active-strategy-callout">
         <span class="callout-label">Active Strategy</span>
-        <select id="active-strategy-select" class="strategy-select">
+        <select id="active-strategy-select" class="strategy-select" aria-label="Active Strategy">
             {% for s in strategies %}
             <option value="{{ s.name }}"
                     {% if s.is_active %}selected{% endif %}

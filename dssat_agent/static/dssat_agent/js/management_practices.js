@@ -172,7 +172,7 @@
             <div class="mgmt-form">
                 <div class="form-group">
                     <label>Irrigation Method</label>
-                    <select data-irr-mode>
+                    <select data-irr-mode aria-label="Irrigation Method">
                         <option value="">None</option>
                         <option value="automatic">Automatic</option>
                         <option value="fixed">Fixed Schedule</option>
@@ -181,11 +181,11 @@
                 <div data-irr-auto class="form-grid" style="display:none">
                     <div class="form-group">
                         <label>Threshold (% depletion)</label>
-                        <input type="number" data-irr-threshold min="0" max="100" step="1">
+                        <input type="number" data-irr-threshold min="0" max="100" step="1" aria-label="Irrigation threshold (% depletion)">
                     </div>
                     <div class="form-group">
                         <label>Efficiency (%)</label>
-                        <input type="number" data-irr-efficiency min="0" max="100" step="1">
+                        <input type="number" data-irr-efficiency min="0" max="100" step="1" aria-label="Irrigation efficiency (%)">
                     </div>
                 </div>
                 <div data-irr-fixed style="display:none">
@@ -300,7 +300,7 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Harvest Mode</label>
-                        <select data-harvest-option>
+                        <select data-harvest-option aria-label="Harvest Mode">
                             <option value="">Auto (at maturity)</option>
                             <option value="maturity">Physiological Maturity</option>
                             ${onDateOption}
@@ -310,18 +310,18 @@
                     </div>
                     <div class="form-group" data-harvest-date-wrap style="display:none">
                         <label>Harvest Date</label>
-                        <input type="date" data-harvest-date>
+                        <input type="date" data-harvest-date aria-label="Harvest Date">
                     </div>
                     <div class="form-group" data-harvest-stage-wrap style="display:none">
                         <label>Growth Stage</label>
-                        <select data-harvest-stage>
+                        <select data-harvest-stage aria-label="Growth Stage">
                             <option value="">(select)</option>
                         </select>
                         <span class="helptext" data-harvest-stage-hint></span>
                     </div>
                     <div class="form-group" data-harvest-dap-wrap style="display:none">
                         <label>Days After Planting</label>
-                        <input type="number" data-harvest-dap min="1" max="730" step="1">
+                        <input type="number" data-harvest-dap min="1" max="730" step="1" aria-label="Harvest days after planting">
                     </div>
                 </div>
 
@@ -329,23 +329,23 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label>Harvest Component</label>
-                        <select data-harvest-hcom>
+                        <select data-harvest-hcom aria-label="Harvest Component">
                             <option value="">(default)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Harvest Size</label>
-                        <select data-harvest-hsize>
+                        <select data-harvest-hsize aria-label="Harvest Size">
                             <option value="">(default)</option>
                         </select>
                     </div>
                     <div class="form-group">
                         <label>Product Harvest %</label>
-                        <input type="number" data-harvest-hpc min="0" max="100" step="0.1">
+                        <input type="number" data-harvest-hpc min="0" max="100" step="0.1" aria-label="Product harvest %">
                     </div>
                     <div class="form-group">
                         <label>Byproduct Harvest %</label>
-                        <input type="number" data-harvest-hbpc min="0" max="100" step="0.1">
+                        <input type="number" data-harvest-hbpc min="0" max="100" step="0.1" aria-label="Byproduct harvest %">
                     </div>
                 </div>
             </div>

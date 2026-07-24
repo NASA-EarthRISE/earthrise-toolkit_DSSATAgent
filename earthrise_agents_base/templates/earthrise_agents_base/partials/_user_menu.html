@@ -19,7 +19,7 @@
     <button type="button"
             class="nav-user-toggle {% if active_nav == 'user' %}active{% endif %}">
         <span class="nav-user-name">{{ user.get_short_name|default:user.username }}</span>
-        <span class="nav-user-caret" aria-hidden="true">▾</span>
+        <span class="nav-user-caret" aria-hidden="true"></span>
     </button>
     <div class="nav-dropdown-menu nav-user-menu">
         {% regroup user_menu_items by agent_display as user_sections %}

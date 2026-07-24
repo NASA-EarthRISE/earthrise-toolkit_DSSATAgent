@@ -80,6 +80,15 @@
     min-height: 70px;
 }
 
+/* Placeholder text must meet 4.5:1 on the --color-bg field background.
+   The browser-default placeholder (~54% opacity) fails, so pin it to the
+   Horizon meta-text token, which clears the threshold on #F5F5F5. */
+.auth-form input::placeholder,
+.auth-form textarea::placeholder {
+    color: var(--color-text-meta);
+    opacity: 1;
+}
+
 .auth-form .form-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -118,7 +127,7 @@
 
 .auth-links a {
     color: var(--color-primary);
-    text-decoration: none;
+    text-decoration: underline;
 }
 
 .auth-links a:hover {

@@ -491,10 +491,10 @@
             '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.4rem;">' +
                 '<button type="button" class="date-nav-btn mc-prev" style="width:24px;height:24px;font-size:0.8rem;background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-text);">◀</button>' +
                 '<div style="display:flex;gap:0.3rem;">' +
-                    '<select class="mc-month" style="background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-text);padding:0.15rem;border-radius:var(--radius);font-size:0.75rem;">' +
+                    '<select class="mc-month" aria-label="Month" style="background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-text);padding:0.15rem;border-radius:var(--radius);font-size:0.75rem;">' +
                         MONTHS.map(function(m,i) { return '<option value="'+i+'">'+m+'</option>'; }).join('') +
                     '</select>' +
-                    '<select class="mc-year" style="background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-text);padding:0.15rem;border-radius:var(--radius);font-size:0.75rem;">' +
+                    '<select class="mc-year" aria-label="Year" style="background:var(--color-bg);border:1px solid var(--color-border);color:var(--color-text);padding:0.15rem;border-radius:var(--radius);font-size:0.75rem;">' +
                         (function() { var h=''; for(var y=2015;y<=2030;y++) h+='<option value="'+y+'">'+y+'</option>'; return h; })() +
                     '</select>' +
                 '</div>' +

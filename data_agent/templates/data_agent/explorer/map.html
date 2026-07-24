@@ -11,7 +11,7 @@
 {% endblock %}
 {% block body %}
 {% include "earthrise_agents_base/partials/nav.html" with active_nav="map" active_agent="data_agent" %}
-<div class="map-page">
+<main class="map-page" id="main-content">
     <!-- ===== Row 1: Source / Variable / Date ===== -->
     <div class="map-controls mc-row1">
         <div class="control-group">
@@ -106,7 +106,7 @@
         <span class="qm-divider"></span>
 
         <label class="qm-agg-label">Aggregation</label>
-        <select id="area-aggregation"
+        <select id="area-aggregation" aria-label="Aggregation"
                 style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.2);
                        color:rgba(255,255,255,0.85);padding:0.2rem 0.4rem;border-radius:var(--radius);font-size:0.75rem;"
                 disabled>
@@ -136,7 +136,7 @@
         <div id="footer-handle" class="footer-handle">
             <div class="footer-grip"></div>
             <span class="footer-label">Query Results</span>
-            <select id="query-location-select" class="is-hidden" style="font-size:0.75rem;background:var(--color-bg);
+            <select id="query-location-select" class="is-hidden" aria-label="Query location" style="font-size:0.75rem;background:var(--color-bg);
                 border:1px solid var(--color-border);color:var(--color-text);padding:0.15rem 0.4rem;
                 border-radius:var(--radius);max-width:280px;"></select>
             <span id="query-location-label" class="footer-loc-label"></span>
@@ -144,12 +144,12 @@
         </div>
 
         <!-- Expandable content — scrollable -->
-        <div id="query-results-content" class="query-results-body">
+        <div id="query-results-content" class="query-results-body" tabindex="0" role="region" aria-label="Query results">
             <div class="qr-pad">
                 <!-- Dataset run history for current location -->
                 <div id="query-run-row" class="query-run-row">
                     <label class="qm-field-label">Dataset</label>
-                    <select id="query-run-select" style="background:var(--color-bg);border:1px solid var(--color-border);
+                    <select id="query-run-select" aria-label="Dataset" style="background:var(--color-bg);border:1px solid var(--color-border);
                         color:var(--color-text);padding:0.2rem 0.4rem;border-radius:var(--radius);font-size:0.78rem;max-width:320px;"></select>
                     <span id="query-run-count" class="qr-count"></span>
                 </div>
@@ -157,7 +157,7 @@
                 <!-- Query controls — variable selector + date range + reload/add (all query types) -->
                 <div id="query-controls-row" class="query-controls-row">
                     <label class="qm-field-label">Variable</label>
-                    <select id="query-variable"></select>
+                    <select id="query-variable" aria-label="Variable"></select>
 
                     <span id="query-date-range-group" class="qm-date-range">
                         <label>From</label>
@@ -204,7 +204,7 @@
             </div>
         </div>
     </div>
-</div>
+</main>
 {% endblock %}
 {% block extra_js %}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"

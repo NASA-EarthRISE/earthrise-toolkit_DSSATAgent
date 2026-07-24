@@ -18,6 +18,27 @@
     --color-dark:      #2e2e32;   /* header, modal headers, timeline bar */
     --color-text:      #3a3a3a;   /* default body text */
     --color-text-meta: #58585b;   /* labels, subtitles, muted text */
+
+    /* Text/icon colors for use ON the dark surface (--color-dark), e.g. the
+       app header/nav. The body-text tokens above are near-black and fail
+       contrast on the dark nav, so on-dark UI must use these instead.
+       --color-on-dark is the primary (brand/title) on-dark color; the -muted
+       variant is for secondary nav items and still clears 4.5:1 on #2e2e32. */
+    --color-on-dark:        #ffffff;
+    /* Opaque light gray (not a translucent white) so automated contrast
+       tools can evaluate it — semi-transparent foreground text is flagged
+       even when the composited result passes. Equivalent to ~85% white and
+       clears 4.5:1 on both --color-dark and --color-on-dark-surface. */
+    --color-on-dark-muted:  #e2e2e3;
+    --color-on-dark-border: rgba(255, 255, 255, 0.3);
+    /* Opaque "raised" surfaces on the dark nav. These are solid equivalents
+       of the translucent white overlays previously used for the user pill —
+       kept solid so automated contrast tools can evaluate text over them
+       (they cannot see through a semi-transparent background and flag it as
+       a failure even when the composited result passes). Visually identical
+       to rgba(255,255,255,0.08)/0.14 composited on --color-dark. */
+    --color-on-dark-surface:       #3f3f42;
+    --color-on-dark-surface-hover: #4b4b4f;
     --color-bg:        #F5F5F5;   /* page background */
     --color-surface:   #FFFFFF;   /* cards, panels, modal bodies */
     --color-border:    #dddddd;   /* dividers, input borders */
@@ -28,6 +49,19 @@
     --color-success:   #15803d;   /* success text, "recommended"/ok badges */
     --color-warning:   #8a6d0b;   /* caution/warning text */
     --color-error:     var(--color-hover);  /* error text (#f64137) */
+
+    /* "On-tint" text shades — darker variants of the brand/semantic hues,
+       for SMALL text placed on a low-opacity tint of the SAME hue (status
+       pills, badges, step pills). The base brand tokens above are tuned for
+       links/borders/charts on white and do NOT reach the 4.5:1 AA threshold
+       on a ~12-18% tint of themselves; these darker shades do. Reference
+       these from pill/badge text (not the base token) so the accent stays
+       configurable in one place while small-text contrast stays compliant. */
+    --color-primary-on-tint: #015d99;
+    --color-action-on-tint:  #1553bd;
+    --color-success-on-tint: #0f6b32;
+    --color-warning-on-tint: #795f0a;
+    --color-error-on-tint:   #c62f27;
 
     /* Muted body text alias + subtle row/cell hover surface. Named so
        consumers stop relying on inline var() fallbacks. */

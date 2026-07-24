@@ -90,9 +90,14 @@ body.explorer-page {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    /* Solid Horizon primary fill (not a gradient). A gradient here is a
+       background-image, which leaves background-color transparent — automated
+       contrast tools then cannot evaluate the white button text over the
+       gradient and report it as "needs review". A solid --color-primary fill
+       (white text = 5.22:1) is unambiguous and stays on-brand. */
+    background-color: var(--primary-color);
     border-color: transparent;
-    color: white;
+    color: #ffffff;
     box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 30%, transparent);
 }
 
@@ -104,7 +109,7 @@ body.explorer-page {
 .btn-secondary {
     background: color-mix(in srgb, var(--color-action) 15%, transparent);
     border-color: color-mix(in srgb, var(--color-action) 30%, transparent);
-    color: var(--color-action);
+    color: var(--color-action-on-tint);
 }
 
 .btn-secondary:hover {
@@ -125,7 +130,7 @@ body.explorer-page {
 .btn-danger {
     background: color-mix(in srgb, var(--color-hover) 12%, transparent);
     border-color: color-mix(in srgb, var(--color-hover) 30%, transparent);
-    color: var(--color-hover);
+    color: var(--color-error-on-tint);
 }
 
 .btn-danger:hover {
@@ -561,17 +566,17 @@ select.form-input option {
 
 .status-pill.status-completed {
     background: rgba(16, 185, 129, 0.15);
-    color: var(--color-success);
+    color: var(--color-success-on-tint);
 }
 
 .status-pill.status-pending {
     background: rgba(251, 191, 36, 0.18);
-    color: var(--color-warning);
+    color: var(--color-warning-on-tint);
 }
 
 .status-pill.status-failed {
     background: color-mix(in srgb, var(--color-hover) 15%, transparent);
-    color: var(--color-hover);
+    color: var(--color-error-on-tint);
 }
 
 /* ===================================
